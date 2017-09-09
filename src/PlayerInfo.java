@@ -14,7 +14,12 @@ public class PlayerInfo {
     }
 
     public void setPlayerName(String playerName) {
-        this.playerName = playerName;
+
+        if (playerName.length() == 2) {
+            this.playerName = playerName;
+        } else {
+            throw new RuntimeException("Wrong player Name, should be 2 character");
+        }
     }
 
     public Position getPosition() {
