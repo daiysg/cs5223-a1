@@ -6,8 +6,7 @@ public class Game {
     private PlayerInfo playerInfo;
     private PlayerStatus playerStatus;
 
-    private String masterPlayerName;
-    private String slavePlayerName;
+    private GameStatus gameStatus;
 
     public PlayerInfo getPlayerInfo() {
         return playerInfo;
@@ -25,19 +24,11 @@ public class Game {
         this.playerStatus = playerStatus;
     }
 
-    public String getMasterPlayerName() {
-        return masterPlayerName;
+    public GameStatus getGameStatus() {
+        return gameStatus;
     }
 
-    public void setMasterPlayerName(String masterPlayerName) {
-        this.masterPlayerName = masterPlayerName;
-    }
-
-    public String getSlavePlayerName() {
-        return slavePlayerName;
-    }
-
-    public void setSlavePlayerName(String slavePlayerName) {
-        this.slavePlayerName = slavePlayerName;
+    public void setGameStatus(GameStatus gameStatus) {
+        this.gameStatus = gameStatus;
     }
 }
