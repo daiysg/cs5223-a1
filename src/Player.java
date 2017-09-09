@@ -6,10 +6,9 @@ public class Player {
     private PlayerInfo playerInfo;
     private PlayerStatus playerStatus;
 
-
     private String masterPlayerName;
     private String slavePlayerName;
-    
+
     public PlayerInfo getPlayerInfo() {
         return playerInfo;
     }
