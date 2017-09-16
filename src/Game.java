@@ -14,7 +14,7 @@ public class Game implements GameInterface {
     private String masterId;
     protected String slaveId;
     protected Vector<GameInterface> games;
-
+    public int[][] treasuresGrid;
     //shared info
     protected GameStatus serverGameStatus;
 
