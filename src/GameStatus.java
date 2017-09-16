@@ -1,6 +1,7 @@
 
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -21,6 +22,7 @@ public class GameStatus implements Serializable {
 
     public Vector<Player> players;
 
+    public Map<Player, Integer> playerLastMoveMap;
 
     public GameInterface masterServer;
 

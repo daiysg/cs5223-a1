@@ -10,13 +10,14 @@ public interface GameInterface extends Remote {
     /**
      * All Players Work
      */
-    public void startGame(GameStatus initGameState)  throws RemoteException;
+    void startGame(GameStatus initGameState)  throws RemoteException;
+
+
 
     /**
      * Master Work
      *
      */
-
     //receive move from client
     GameStatus move(String id, Direction direction) throws RemoteException;
 
@@ -31,6 +32,10 @@ public interface GameInterface extends Remote {
     GameStatus callSlave(String id, Direction moveDirection) throws RemoteException;
 
 
+    /**
+     * Slave Work
+     * @return
+     */
 
     String getId();
 }

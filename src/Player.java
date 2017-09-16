@@ -18,8 +18,8 @@ public class Player implements Runnable{
 
     @Override
     public void run() {
-        System.out.println("Game initializing...");
-        System.out.println("Game starts...");
+        System.out.println("GameServer initializing...");
+        System.out.println("GameServer starts...");
 
         do {
             try {

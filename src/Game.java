@@ -14,7 +14,11 @@ public class Game implements GameInterface {
     private String masterId;
     protected String slaveId;
     protected Vector<GameInterface> games;
+
+    //shared info
     protected GameStatus serverGameStatus;
+
+
     protected Timer pingTimer;
     public Player game;
     private TrackerInterface trackerInterface;
@@ -25,7 +29,6 @@ public class Game implements GameInterface {
         this.serverGameStatus = new GameStatus();
 
         trackerInterface.joinGame(this);
-
         //
         List<Game> gameList = trackerInterface.getGameList();
 
@@ -34,8 +37,8 @@ public class Game implements GameInterface {
 
     @Override
     public void startGame(GameStatus initGameState) throws RemoteException {
-        this.gamePlay.setGameState(initGameState);
-        Thread t = new Thread(this.gamePlay);
+        this.game.setGameState(initGameState);
+        Thread t = new Thread(this.game);
         t.start();
     }
 
