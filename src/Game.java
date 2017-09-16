@@ -1,34 +1,72 @@
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Timer;
+import java.util.Vector;
+
 /**
- * Created by ydai on 9/9/17.
+ * Created by ydai on 16/9/17.
  */
-public class Game {
+public class Game implements GameInterface {
 
-    private PlayerInfo playerInfo;
-    private PlayerStatus playerStatus;
+    public static final int PING_TIMER_IN_SECONDS = 2; // ping between master to all players
 
-    private GameStatus gameStatus;
+    private Boolean isMaster = false;
+    private String masterId;
+    protected String slaveId;
+    protected Vector<GameInterface> games;
+    protected GameStatus serverGameStatus;
+    protected Timer pingTimer;
+    public Player game;
+    private TrackerInterface trackerInterface;
 
-    public PlayerInfo getPlayerInfo() {
-        return playerInfo;
+
+    public Game() throws RemoteException {
+        this.games = new Vector<GameInterface>();
+        this.serverGameStatus = new GameStatus();
+
+        trackerInterface.joinGame(this);
+
+        //
+        List<Game> gameList = trackerInterface.getGameList();
+
+
     }
 
-    public void setPlayerInfo(PlayerInfo playerInfo) {
-        this.playerInfo = playerInfo;
+    @Override
+    public void startGame(GameStatus initGameState) throws RemoteException {
+        this.gamePlay.setGameState(initGameState);
+        Thread t = new Thread(this.gamePlay);
+        t.start();
     }
 
-    public PlayerStatus getPlayerStatus() {
-        return playerStatus;
+    @Override
+    public GameStatus move(String id, Direction direction) throws RemoteException {
+        return null;
     }
 
-    public void setPlayerStatus(PlayerStatus playerStatus) {
-        this.playerStatus = playerStatus;
+    @Override
+    public boolean createSlave(GameStatus gameState, Vector<ClientInterface> clients) throws RemoteException {
+        return false;
     }
 
-    public GameStatus getGameStatus() {
-        return gameStatus;
+    @Override
+    public GameStatus callSlave(String id, Direction moveDirection) throws RemoteException {
+        return null;
     }
 
-    public void setGameStatus(GameStatus gameStatus) {
-        this.gameStatus = gameStatus;
+    @Override
+    public void pindAllPlayers(Vector<ClientInterface> players) throws RemoteException {
+
     }
+
+    @Override
+    public GameStatus findSlave(String id, Direction direction) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public String getId() {
+        return this.masterId;
+    }
+
 }

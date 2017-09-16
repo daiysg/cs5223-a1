@@ -1,21 +1,18 @@
 import java.util.List;
+import java.util.Vector;
 
 /**
  * Created by ydai on 9/9/17.
  */
 public class Tracker {
-    private List<String> playerNameList;
+    private List<GameInterface> serverList;
+
+    protected Vector<GameInterface> servers;
 
     private Integer n;
     private Integer k;
 
-    public List<String> getPlayerNameList() {
-        return playerNameList;
-    }
 
-    public void setPlayerNameList(List<String> playerNameList) {
-        this.playerNameList = playerNameList;
-    }
 
     public Integer getN() {
         return n;

@@ -1,46 +1,31 @@
-import java.util.List;
-import java.util.Set;
+
+
+import java.io.Serializable;
+import java.util.Vector;
 
 /**
- * Created by ydai on 9/9/17.
+ * The object that is sent back to clients updating them about the game state
  */
-public class GameStatus {
+public class GameStatus implements Serializable {
 
-    private Integer n;
-    private Integer k;
+    private static final long serialVersionUID = 1L;
 
-    private Set<Position> treasurePlaces;
-    private List<PlayerInfo> playerInfoList;
+    //grid size
+    public int n;
 
-    public Integer getN() {
-        return n;
-    }
+    //Number of Treasures
+    public int k;
 
-    public void setN(Integer n) {
-        this.n = n;
-    }
+    //k left
+    public int numTreasuresLeft;
 
-    public Integer getK() {
-        return k;
-    }
+    public Vector<Player> players;
 
-    public void setK(Integer k) {
-        this.k = k;
-    }
 
-    public Set<Position> getTreasurePlaces() {
-        return treasurePlaces;
-    }
+    public GameInterface masterServer;
 
-    public void setTreasurePlaces(Set<Position> treasurePlaces) {
-        this.treasurePlaces = treasurePlaces;
-    }
+    public GameInterface slaveServer;
 
-    public List<PlayerInfo> getPlayerInfoList() {
-        return  playerInfoList;
-    }
+    public boolean isGameStarted = false;
 
-    public void setPlayerInfoList(List<PlayerInfo> playerInfoList) {
-        this. playerInfoList = playerInfoList;
-    }
 }
