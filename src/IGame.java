@@ -47,7 +47,7 @@ public interface IGame extends Remote {
      * @throws RemoteException
      */
     List<Player> addNewPlayer(Game game) throws RemoteException;
-    
+
     /**
      * Master call player game start
      *

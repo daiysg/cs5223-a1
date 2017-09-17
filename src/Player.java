@@ -14,10 +14,13 @@ public class Player {
 
     private Integer numOfSteps;
 
-    public Player(String id, Position position, Integer acquiredTresure, Integer numOfSteps) {
+    private PlayerStatus playerStatus;
+
+    public Player(String id, Position position, Integer acquiredTresure, Integer numOfSteps, PlayerStatus playerStatus) {
         this.id = id;
         this.position = position;
         this.acquiredTresure = acquiredTresure;
         this.numOfSteps = numOfSteps;
+        this.playerStatus = playerStatus;
     }
 }
