@@ -6,7 +6,30 @@ import java.util.List;
  */
 public interface ITracker {
 
-    public int joinGame(IGame server) throws RemoteException;
+    /**
+     *
+     * Player call tracker to join game
+     * @param game
+     * @return
+     * @throws RemoteException
+     */
+    int joinGame(IGame game) throws RemoteException;
 
-    List<Game> getGameList();
+    /**
+     *
+     */
+    void initGame(int n, int k) throws RemoteException;
+
+    /**
+     *
+     * master update Tracker with new Player List
+     * Get the player list
+     * @param playerList
+     */
+    void updatePlayerList(List<Player> playerList);
+
+    /**
+     *
+     */
+    List<Player> getPlayerList();
 }

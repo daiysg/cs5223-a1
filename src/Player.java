@@ -10,8 +10,14 @@ public class Player {
 
     private Position position;
 
-    public Player(String id, Position position) {
+    private Integer acquiredTresure;
+
+    private Integer numOfSteps;
+
+    public Player(String id, Position position, Integer acquiredTresure, Integer numOfSteps) {
         this.id = id;
         this.position = position;
+        this.acquiredTresure = acquiredTresure;
+        this.numOfSteps = numOfSteps;
     }
 }

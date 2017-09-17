@@ -7,6 +7,9 @@ import java.util.Vector;
 
 /**
  * Created by ydai on 16/9/17.
+ *
+ * Refer to Peer
+ *
  */
 public class Game implements IGame {
 
@@ -14,17 +17,19 @@ public class Game implements IGame {
     public static final int MASTER_SERVER_INDEX = 0;
     public static final int SLAVE_SERVER_INDEX = 1;
 
-    private Boolean isMaster = false;
-
     /**
      * An ordered list of all gamer in the game
-     * Please note that first is primary and second is backup
+     * Please note that MASTER_SERVER_INDEX is Master and SLAVE_SERVER_INDEX is Slave
      */
     protected List<IGame> games;
+
+    private Boolean isMaster = false;
+
     //shared info
+    //add synchronize if change
     protected GameStatus serverGameStatus;
 
-
+    //timer for pingh
     protected Timer pingTimer;
 
     /**
@@ -43,14 +48,13 @@ public class Game implements IGame {
      */
     private Thread gameInputThread;
 
-
     @Override
     public void ping() throws RemoteException {
 
     }
 
     @Override
-    public void updateGameState(Game game) throws RemoteException {
+    public void updateGameStatus(Game game) throws RemoteException {
 
     }
 
@@ -68,11 +72,14 @@ public class Game implements IGame {
     public Player joinGame(IGame game) throws RemoteException {
         return null;
     }
-
     @Override
-    public GameStatus move(String playerId, Direction direction, int counter) throws RemoteException {
-        return null;
+    public synchronized Game move(String id, Direction direction) throws RemoteException {
+        return game;
     }
+
+
+
+
 
     @Override
     public String getId() {
