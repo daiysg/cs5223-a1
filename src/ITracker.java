@@ -4,9 +4,9 @@ import java.util.List;
 /**
  * Created by ydai on 16/9/17.
  */
-public interface TrackerInterface {
+public interface ITracker {
 
-    public int joinGame(GameInterface server) throws RemoteException;
+    public int joinGame(IGame server) throws RemoteException;
 
     List<Game> getGameList();
 }

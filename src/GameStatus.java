@@ -1,6 +1,7 @@
 
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
@@ -17,16 +18,27 @@ public class GameStatus implements Serializable {
     //Number of Treasures
     public int k;
 
-    //k left
-    public int numTreasuresLeft;
+    /**
+     * 2D map of players List.
+     */
+    private Player[][] coordinatesToPlayer;
 
-    public Vector<Player> players;
+    /**
+     * Coordinates of all Treasure
+     */
+    public int[][] treasureGrid;
 
     public Map<Player, Integer> playerLastMoveMap;
 
-    public GameInterface masterServer;
+    /**
+     * A mapping of player id to the player object.
+     */
+    private HashMap<String, Player> playerHashMap;
 
-    public GameInterface slaveServer;
+    /**
+     * A mapping of player id to the number of treasures collected.
+     */
+    private HashMap<String, Integer> playerTreasureCollect;
 
     public boolean isGameStarted = false;
 

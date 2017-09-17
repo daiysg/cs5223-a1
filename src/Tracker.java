@@ -5,9 +5,9 @@ import java.util.Vector;
  * Created by ydai on 9/9/17.
  */
 public class Tracker {
-    private List<GameInterface> serverList;
+    private List<IGame> serverList;
 
-    protected Vector<GameInterface> servers;
+    protected Vector<IGame> servers;
 
     private Integer n;
     private Integer k;
