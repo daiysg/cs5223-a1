@@ -27,4 +27,12 @@ public class Player {
     public String getId() {
         return id;
     }
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
+    }
 }

@@ -20,7 +20,7 @@ public interface IGame extends Remote {
     /**
      * slave call master
      */
-    void pingMaster() throws RemoteException;
+    void pingMaster() throws RemoteException, WrongGameException;
 
     /**
      *
@@ -46,7 +46,7 @@ public interface IGame extends Remote {
      * @param game
      * @throws RemoteException
      */
-    List<Player> addNewPlayer(Game game) throws RemoteException;
+    List<IGame> addNewPlayer(Game game) throws RemoteException;
 
     /**
      * Master call player game start
@@ -69,11 +69,13 @@ public interface IGame extends Remote {
      *  need handle exit game
      */
 
-    GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException;
+    GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException, WrongGameException;
 
     void setSlave(Boolean slave);
 
     String getId();
 
     Player getPlayer();
+
+    void setServerGameStatus(GameStatus serverGameStatus);
 }

@@ -30,7 +30,7 @@ public class GameStatus implements Serializable {
     /**
      * Number of moves processed for players
      */
-    public Map<Player, Integer> playerLastMoveMap;
+    public Map<String, Integer> playerLastMoveMap;
 
     /**
      * A mapping of player id to the player object.
@@ -57,5 +57,45 @@ public class GameStatus implements Serializable {
 
     public void setPlayerHashMap(Map<String, Player> playerHashMap) {
         this.playerHashMap = playerHashMap;
+    }
+
+    public void prepareForNewPlayer(Player player) {
+
+        //1. assign random position for new Player
+        Position position = getAvailRandomPosition();
+        player.setPosition(position);
+        playerPosition[position.getX()][position.getY()] = player;
+
+        //2. add new player into playerMap and player last move map, player treasuremap
+        playerHashMap.put(player.getId(), player);
+        playerLastMoveMap.put(player.getId(), 0);
+        playerTreasureMap.put(player.getId(), 0);
+    }
+
+
+
+    private Position getRandomPosition() {
+        Random random = new Random();
+        int randomX = random.nextInt(gridSize);
+        int randomY = random.nextInt(gridSize);
+        return new Position(randomX, randomY);
+    }
+
+    private Position getAvailRandomPosition() {
+        Position candidatePosition;
+        do {
+            candidatePosition = getRandomPosition();
+        } while (!isVacantCell(candidatePosition.getX(), candidatePosition.getY()));
+        return candidatePosition;
+    }
+
+    private boolean isVacantCell(int x, int y) {
+        return this.playerPosition[x][y] == null;
+    }
+
+    public void movePlayer(String playerId, Direction direction, int numOfStep) {
+        Player player = this.playerHashMap.get(playerId);
+        Position position = player.getPosition();
+
     }
 }

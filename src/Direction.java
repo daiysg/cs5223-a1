@@ -19,22 +19,28 @@ public enum Direction {
     }
 
 
-    public static Direction getDirection(int input) {
-        switch (input) {
-            case 1:
-                return W;
-            case 2:
-                return S;
-            case 3:
-                return E;
-            case 4:
-                return N;
-            case 9:
-                return QUIT;
-            case 0:
-                return NO_MOVE;
-            default:
-                return INVALID;
+    public static Direction getDirection(String inputString) {
+
+        try {
+            Integer input = Integer.valueOf(inputString);
+            switch (input) {
+                case 1:
+                    return W;
+                case 2:
+                    return S;
+                case 3:
+                    return E;
+                case 4:
+                    return N;
+                case 9:
+                    return QUIT;
+                case 0:
+                    return NO_MOVE;
+                default:
+                    return INVALID;
+            }
+        } catch (Exception ex) {
+            return INVALID;
         }
     }
 }
