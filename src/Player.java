@@ -23,4 +23,8 @@ public class Player {
         this.numOfSteps = numOfSteps;
         this.playerStatus = playerStatus;
     }
+
+    public String getId() {
+        return id;
+    }
 }

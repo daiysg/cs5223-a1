@@ -1,10 +1,13 @@
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ydai on 16/9/17.
  */
 public interface ITracker {
+
+    List<IGame> getServerList();
 
     /**
      *
@@ -22,14 +25,9 @@ public interface ITracker {
 
     /**
      *
-     * master update Tracker with new Player List
+     * master update Tracker with new Game List
      * Get the player list
-     * @param playerList
-     */
-    void updatePlayerList(List<Player> playerList);
+     * @param serverList
+     */ void setServerList(List<IGame> serverList);
 
-    /**
-     *
-     */
-    List<Player> getPlayerList();
 }

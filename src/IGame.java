@@ -71,5 +71,9 @@ public interface IGame extends Remote {
 
     GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException;
 
+    void setSlave(Boolean slave);
+
     String getId();
+
+    Player getPlayer();
 }

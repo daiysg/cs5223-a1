@@ -17,10 +17,6 @@ public class GameStatus implements Serializable {
     //Number of Treasures
     private int totalTreasures;
 
-
-    //Player List Info
-    private List<Player> playerList;
-
     /**
      * players position List.
      */
@@ -51,51 +47,15 @@ public class GameStatus implements Serializable {
         this.totalTreasures = k;
         this.playerHashMap = new HashMap<>();
         this.playerTreasureMap = new HashMap<>();
+        this.playerPosition = new Player[gridSize][gridSize];
+        this.playerLastMoveMap = new HashMap<>();
     }
 
-    public int getMazeSize() {
-        return this.mazeSize;
+    public Map<String, Player> getPlayerHashMap() {
+        return playerHashMap;
     }
 
-    public void start() {
-        if (this.started) {
-            return;
-        }
-
-        // Scatter treasures.
-        for (int i = 0; i < this.totalTreasures; i++) {
-            Pair<Integer, Integer> randomPosition = this.getVacantRandomPosition();
-            this.coordinatesToNumberOfTreasure[randomPosition.x][randomPosition.y]++;
-        }
-        this.started = true;
+    public void setPlayerHashMap(Map<String, Player> playerHashMap) {
+        this.playerHashMap = playerHashMap;
     }
-
-    public boolean hasStarted() {
-        return this.started;
-    }
-
-    public boolean isOver() {
-        return this.started && this.remainingTreasures == 0;
-    }
-
-    public Player getPlayer(String id) {
-        return this.playerIdToPlayerHashMap.get(id);
-    }
-
-    public Player getPlayerAt(int x, int y) {
-        return this.coordinatesToPlayer[x][y];
-    }
-
-    public int getNumTreasuresAt(int x, int y) {
-        return this.coordinatesToNumberOfTreasure[x][y];
-    }
-
-    public int getPlayerTreasureCount(String id) {
-        return this.playerIdToTreasures.get(id);
-    }
-
-    public Collection<Player> getPlayers() {
-        return this.playerIdToPlayerHashMap.values();
-    }
-
 }
