@@ -236,6 +236,11 @@ public class Game implements IGame {
         if (this.isMaster == false) {
             throw new WrongGameException("I am Not Master, please do not call me dude....");
         }
+
+        if (direction == Direction.QUIT) {
+          quitGame(playerId);
+        }
+
         serverGameStatus.movePlayer(playerId, direction, numOfStep);
 
         IGame slave = this.getSlave();
@@ -251,6 +256,11 @@ public class Game implements IGame {
         }
 
         return serverGameStatus;
+    }
+
+
+    //TODO: QUIT GAME
+    private void quitGame(String playerId) {
     }
 
 
