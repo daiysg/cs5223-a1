@@ -1,8 +1,12 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.rmi.AlreadyBoundException;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
 
 /**
  * Created by ydai on 16/9/17.
@@ -10,10 +14,6 @@ import java.util.*;
  * Refer to Peer
  */
 public class Game implements IGame {
-
-    // Host and Port when create Igame
-    private String host;
-    private int port;
 
     //playerId which is the name of this game
     private String playerId;
@@ -54,6 +54,22 @@ public class Game implements IGame {
     private Boolean gameStart = false;
 
     private Integer numOfStep = 0;
+
+
+    public Game(ITracker tracker, String playerId) throws RemoteException, AlreadyBoundException, NotBoundException {
+        this.tracker = tracker;
+        gameStart = false;
+        gameList = new ArrayList<>();
+
+        if (isMaster) {
+            startGame(serverGameStatus);
+        }
+    }
+
+    @Override
+    public void askTrackerJoinGame() throws RemoteException {
+        tracker.joinGame(this);
+    }
 
     @Override
     public void ping() throws RemoteException {
@@ -359,3 +375,5 @@ public class Game implements IGame {
         this.gameStart = gameStart;
     }
 }
+
+

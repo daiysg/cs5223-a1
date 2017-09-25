@@ -1,16 +1,17 @@
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * Created by ydai on 9/9/17.
  */
-public class Tracker implements ITracker{
+public class Tracker extends UnicastRemoteObject implements ITracker{
     private List<IGame> serverList;
 
     private Integer n;
     private Integer k;
-
 
 
     public Integer getN() {
@@ -28,6 +29,14 @@ public class Tracker implements ITracker{
     public void setK(Integer k) {
         this.k = k;
     }
+
+    public Tracker(Integer n, Integer k) throws RemoteException, NotBoundException {
+        this.n = n;
+        this.k = k;
+
+        this.serverList = new ArrayList<>();
+    }
+
 
     @Override
     public List<IGame> getServerList() {
@@ -49,3 +58,4 @@ public class Tracker implements ITracker{
         this.serverList = serverList;
     }
 }
+

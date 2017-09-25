@@ -3,7 +3,6 @@
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Vector;
 
 public interface IGame extends Remote {
 
@@ -11,6 +10,8 @@ public interface IGame extends Remote {
      * Message will send to all player
      *
      */
+    void askTrackerJoinGame() throws RemoteException;
+
     /**
      * health check
      */
