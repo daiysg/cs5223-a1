@@ -27,22 +27,7 @@ public class GameStarter {
         Registry registry = LocateRegistry.getRegistry(host, port);
         ITracker tracker = (ITracker) registry.lookup("tracker");
         Game game = new Game(tracker, playerId);
-        createGame(game, playerId);
-
         game.askTrackerJoinGame();
     }
 
-
-    private static void createGame(Game game, String playerId) throws RemoteException, NotBoundException, AlreadyBoundException {
-        System.setProperty(
-                "java.rmi.server.codebase",
-                Game.class.getProtectionDomain().getCodeSource().getLocation().toString());
-        Registry registry = LocateRegistry.getRegistry();
-        try {
-            registry.bind(playerId, game);
-        } catch (AlreadyBoundException e) {
-            registry.unbind(playerId);
-            registry.bind(playerId, game);
-        }
-    }
 }

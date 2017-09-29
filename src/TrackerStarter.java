@@ -13,6 +13,7 @@ public class TrackerStarter {
         int k = args.length > 1 ? Integer.parseInt(args[1]) : 5;
         Tracker tracker =  new Tracker(n, k);
         createTracker(tracker);
+        tracker.initGame(n, k);
     }
 
     private static void createTracker(Tracker tracker) throws RemoteException, NotBoundException, AlreadyBoundException {

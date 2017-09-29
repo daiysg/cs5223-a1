@@ -60,15 +60,16 @@ public class Game implements IGame {
         this.tracker = tracker;
         gameStart = false;
         gameList = new ArrayList<>();
-
-        if (isMaster) {
-            startGame(serverGameStatus);
-        }
+        askTrackerJoinGame();
+        startGame(serverGameStatus);
     }
 
     @Override
     public void askTrackerJoinGame() throws RemoteException {
         tracker.joinGame(this);
+        if (gameList.size() == 0) {
+            isMaster = true;
+        }
     }
 
     @Override
@@ -163,14 +164,23 @@ public class Game implements IGame {
     }
 
     @Override
-    public synchronized List<IGame> addNewPlayer(Game game) throws RemoteException {
+    public synchronized List<IGame> addNewPlayer(IGame game) throws RemoteException {
 
+        if (game == this) {
+            isMaster = true;
+        }
         //if the player is not master, it means tracker call wrong gamer
         if (!isMaster) {
             Logging.printError("Traker call wrong master to add new Player!!! Player ID + " + playerId);
             return null;
         }
         gameList.add(game);
+
+        //gameList = 1 means need to init game status
+        if (gameList.size() == 1) {
+            initGameStatus();
+        }
+
         serverGameStatus.setPlayerHashMap(Utils.convertGameListToPlayerHashMap(gameList));
         serverGameStatus.prepareForNewPlayer(game.getPlayer());
         if (gameList.size() == 2) {
@@ -180,6 +190,13 @@ public class Game implements IGame {
         game.setGameStart(true);
         game.startGame(serverGameStatus);
         return gameList;
+    }
+
+    private void initGameStatus() {
+        int n = tracker.getN();
+        int k = tracker.getK();
+
+        serverGameStatus = new GameStatus(n, k);
     }
 
     @Override
@@ -371,6 +388,7 @@ public class Game implements IGame {
         this.serverGameStatus = serverGameStatus;
     }
 
+    @Override
     public void setGameStart(Boolean gameStart) {
         this.gameStart = gameStart;
     }

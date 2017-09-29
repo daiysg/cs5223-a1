@@ -1,11 +1,14 @@
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by ydai on 16/9/17.
  */
 public interface ITracker {
+
+    Integer getN();
+
+    Integer getK();
 
     List<IGame> getServerList();
 
@@ -16,7 +19,7 @@ public interface ITracker {
      * @return
      * @throws RemoteException
      */
-    int joinGame(IGame game) throws RemoteException;
+    void joinGame(IGame game) throws RemoteException;
 
     /**
      *

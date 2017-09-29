@@ -7,27 +7,21 @@ import java.util.List;
 /**
  * Created by ydai on 9/9/17.
  */
-public class Tracker extends UnicastRemoteObject implements ITracker{
+public class Tracker extends UnicastRemoteObject implements ITracker {
     private List<IGame> serverList;
 
     private Integer n;
     private Integer k;
 
-
+    @Override
     public Integer getN() {
         return n;
     }
 
-    public void setN(Integer n) {
-        this.n = n;
-    }
 
+    @Override
     public Integer getK() {
         return k;
-    }
-
-    public void setK(Integer k) {
-        this.k = k;
     }
 
     public Tracker(Integer n, Integer k) throws RemoteException, NotBoundException {
@@ -44,13 +38,20 @@ public class Tracker extends UnicastRemoteObject implements ITracker{
     }
 
     @Override
-    public int joinGame(IGame game) throws RemoteException {
-        return 0;
+    public void joinGame(IGame game) throws RemoteException {
+        // first join in
+        if (serverList.size() == 0) {
+            serverList = game.addNewPlayer(game);
+        } else {
+            IGame master = serverList.get(0);
+            serverList = master.addNewPlayer(game);
+        }
     }
 
     @Override
     public void initGame(int n, int k) throws RemoteException {
-
+        this.n = n;
+        this.k = k;
     }
 
     @Override

@@ -47,7 +47,7 @@ public interface IGame extends Remote {
      * @param game
      * @throws RemoteException
      */
-    List<IGame> addNewPlayer(Game game) throws RemoteException;
+    List<IGame> addNewPlayer(IGame game) throws RemoteException;
 
     /**
      * Master call player game start
@@ -79,4 +79,6 @@ public interface IGame extends Remote {
     Player getPlayer();
 
     void setServerGameStatus(GameStatus serverGameStatus);
+
+    void setGameStart(Boolean gameStart);
 }
