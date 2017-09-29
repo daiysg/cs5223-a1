@@ -294,6 +294,40 @@ public class Game implements IGame {
 
     //TODO: QUIT GAME
     private void quitGame(String playerId) {
+        if (isMaster) {
+            if (gameList.size() == 1) {
+                serverGameStatus.playerQuit(playerId);
+                for (Iterator<IGame> iter = gameList.listIterator(); iter.hasNext(); ) {
+                    iter.next();
+                    iter.remove();
+                }
+                tracker.setServerList(gameList);
+            } else {
+                // when master wants to quit the game, assign slave as master
+                IGame newMaster = this.getSlave();
+                if (newMaster != null) {
+                    //update slave game status
+                    try {
+                        newMaster.slaveBecomeMaster();
+                        newMaster.serverGameStatus.playerQuit(playerId);
+                    } catch (Exception ex) {
+
+                    }
+                }
+                newMaster.assgnNewSlave(serverGameStatus);
+            }
+        }
+        else if (isSlave) {
+            // slave wants to quit the game
+            IGame master=this.getMaster();
+            master.serverGameStatus.playerQuit(playerId);
+            master.assgnNewSlave(serverGameStatus);
+        }
+        else {
+            // a normal player wants to quit the game
+            IGame master=this.getMaster();
+            master.serverGameStatus.playerQuit(playerId);
+        }
     }
 
 
@@ -347,11 +381,14 @@ public class Game implements IGame {
     private IGame getMaster() throws WrongGameException {
         if (isMaster) {
             return this;
-        } else if (gameList.size() == 0) {
-            throw new WrongGameException("No valid master");
         } else {
             //first is Master
-            return gameList.get(0);
+            for (int i = 0; i < gameList.size(); i++) {
+                if (gameList.get(i).getIsMaster()) {
+                    return gameList.get(i);
+                }
+            }
+            throw new WrongGameException("No valid master");
         }
     }
 
@@ -359,14 +396,16 @@ public class Game implements IGame {
     private IGame getSlave() throws WrongGameException {
         if (isSlave) {
             return this;
-        } else if (gameList.size() == 0) {
-            return null;
         } else {
-            //first is Slave
-            return gameList.get(0);
+            //second is slave
+            for (int i = 0; i < gameList.size(); i++) {
+                if (gameList.get(i).getIsSlave()) {
+                    return gameList.get(i);
+                }
+            }
+            return null;
         }
     }
-
 
     @Override
     public void setSlave(Boolean slave) {
@@ -376,6 +415,16 @@ public class Game implements IGame {
     @Override
     public String getId() {
         return playerId;
+    }
+
+    @Override
+    public boolean getIsMaster() {
+        return isMaster;
+    }
+
+    @Override
+    public boolean getIsSlave() {
+        return isSlave;
     }
 
     @Override

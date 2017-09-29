@@ -168,4 +168,17 @@ public class GameStatus implements Serializable {
                 return new Position(position.getX(), position.getY());
         }
     }
+
+    public void playerQuit(string playerId)
+    {
+        // remove player from playerPosition;
+        Player player = this.playerHashMap.get(playerId);
+        Position position = player.getPosition();
+        playerPosition[position.getX()][position.getY()] = null;
+
+        // remove player from playerLastMoveMap
+        playerLastMoveMap.remove(playerId);
+        playerHashMap.remove(playerId);
+        playerTreasureMap.remove(playerId);
+    }
 }

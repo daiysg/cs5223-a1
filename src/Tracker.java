@@ -39,12 +39,16 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
 
     @Override
     public void joinGame(IGame game) throws RemoteException {
+        // TODO: Should we move this logic to Game class and let master call Tracker.setServerList to update Tracker's serverList? Prof wants Tracker to be as light as possible
         // first join in
         if (serverList.size() == 0) {
             serverList = game.addNewPlayer(game);
         } else {
-            IGame master = serverList.get(0);
-            serverList = master.addNewPlayer(game);
+            for (int i = 0; i < serverList.size(); i++) {
+                IGame master = serverList.get(i);
+                if (serverList.get(i).isMaster())
+                    serverList = master.addNewPlayer(game);
+            }
         }
     }
 
