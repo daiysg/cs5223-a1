@@ -2,9 +2,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,7 +18,7 @@ import java.util.stream.Collectors;
  * <p>
  * Refer to Peer
  */
-public class Game implements IGame, Serializable {
+public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     /**
      *
@@ -25,6 +27,11 @@ public class Game implements IGame, Serializable {
 
     //playerId which is the name of this game
     private String playerId;
+
+    @Override
+    public void setGameList(List<IGame> gameList) {
+        this.gameList = gameList;
+    }
 
     /**
      * An ordered list of all gamer in the game
@@ -65,12 +72,15 @@ public class Game implements IGame, Serializable {
     private Integer numOfStep = 0;
 
 
-    public Game(ITracker tracker, String playerId) throws RemoteException, AlreadyBoundException, NotBoundException {
-        this.tracker = tracker;
+    public Game(String playerId) throws RemoteException, AlreadyBoundException, NotBoundException {
         gameStart = false;
         gameList = new ArrayList<>();
         serverGameStatus = null;
         this.playerId = playerId;
+    }
+
+    public void connectToTracker(ITracker tracker) throws RemoteException, NotBoundException, MalformedURLException {
+        this.tracker = tracker;
         askTrackerJoinGame();
         askMasterToJoinGame();
         startGameThread();
@@ -93,8 +103,15 @@ public class Game implements IGame, Serializable {
     }
 
     @Override
-    public synchronized void askTrackerJoinGame() throws RemoteException {
-        gameList = tracker.joinGame(this);
+    public synchronized void askTrackerJoinGame() throws RemoteException, NotBoundException, MalformedURLException {
+        initGameStatus();
+        this.gameList = tracker.joinGame(playerId);
+
+        if (gameList.size() == 1) {
+            isMaster = true;
+        } else if (gameList.size() == 2) {
+            isSlave = true;
+        }
     }
 
     @Override
@@ -184,7 +201,14 @@ public class Game implements IGame, Serializable {
             isMaster = true;
 
             gameList = gameList.subList(1, gameList.size());
-            serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> gamer.getId()).collect(Collectors.toList()));
+            serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> {
+                try {
+                    return gamer.getId();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }).filter(id -> id != null).collect(Collectors.toList()));
             tracker.setServerList(gameList);
             try {
                 assignNewSlave(serverGameStatus);
@@ -407,7 +431,14 @@ public class Game implements IGame, Serializable {
     }
 
     private void gameStatusUpdatePlayerList() {
-        serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> gamer.getId()).collect(Collectors.toList()));
+        serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> {
+            try {
+                return gamer.getId();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }).filter(id -> id != null).collect(Collectors.toList()));
     }
 
 
@@ -416,13 +447,13 @@ public class Game implements IGame, Serializable {
      *
      * @param iGame
      */
-    private synchronized void removeFailedGamer(IGame iGame) {
+    private synchronized void removeFailedGamer(IGame iGame) throws RemoteException {
         //remove Failed Player
         serverGameStatus.playerQuit(iGame.getId());
         return;
     }
 
-    private IGame getMaster() throws WrongGameException {
+    private IGame getMaster() throws WrongGameException, RemoteException {
         if (isMaster) {
             return this;
         } else {
@@ -437,7 +468,7 @@ public class Game implements IGame, Serializable {
     }
 
 
-    private IGame getSlave() throws WrongGameException {
+    private IGame getSlave() throws WrongGameException, RemoteException {
         if (isSlave) {
             return this;
         } else {
@@ -452,42 +483,42 @@ public class Game implements IGame, Serializable {
     }
 
     @Override
-    public void setSlave(Boolean slave) {
+    public void setSlave(Boolean slave) throws RemoteException {
         isSlave = slave;
     }
 
     @Override
-    public String getId() {
+    public String getId() throws RemoteException {
         return playerId;
     }
 
     @Override
-    public boolean getIsMaster() {
+    public boolean getIsMaster() throws RemoteException {
         return isMaster;
     }
 
     @Override
-    public boolean getIsSlave() {
+    public boolean getIsSlave() throws RemoteException {
         return isSlave;
     }
 
     @Override
-    public void setServerGameStatus(GameStatus serverGameStatus) {
+    public void setServerGameStatus(GameStatus serverGameStatus) throws RemoteException {
         this.serverGameStatus = serverGameStatus;
     }
 
     @Override
-    public void setGameStart(Boolean gameStart) {
+    public void setGameStart(Boolean gameStart) throws RemoteException {
         this.gameStart = gameStart;
     }
 
     @Override
-    public GameStatus getServerGameStatus() {
+    public GameStatus getServerGameStatus() throws RemoteException {
         return serverGameStatus;
     }
 
     @Override
-    public void setMaster(Boolean master) {
+    public void setMaster(Boolean master) throws RemoteException {
         isMaster = master;
     }
 

@@ -1,3 +1,6 @@
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -7,7 +10,7 @@ import java.util.List;
 /**
  * Created by ydai on 9/9/17.
  */
-public class Tracker extends UnicastRemoteObject implements ITracker {
+public class Tracker extends UnicastRemoteObject implements ITracker, Serializable {
 
     /**
      *
@@ -34,7 +37,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
         this.n = n;
         this.k = k;
 
-        this.serverList = new ArrayList<IGame>();
+        this.serverList = new ArrayList<>();
     }
 
 
@@ -44,10 +47,19 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
     }
 
     @Override
-    public List<IGame> joinGame(IGame game) throws RemoteException {
+    public GameStatus test(GameStatus gameStatus) throws RemoteException{
+        return gameStatus;
+    }
+
+    @Override
+    public synchronized List<IGame> joinGame(String playerId) throws RemoteException, MalformedURLException, NotBoundException {
         // TODO: Should we move this logic to Game class and let master call Tracker.setServerList to update Tracker's serverList? Prof wants Tracker to be as light as possible
         // first join in, the gamer join in is master
-        Logging.printInfo("ASK start to joining game, playerid:" + game.getId());
+        Logging.printInfo("ASK start to joining game, playerid:" + playerId);
+
+        String url = new String("rmi://localhost/"+ playerId);
+        IGame game = (IGame) Naming.lookup(url);
+
         serverList.add(game);
 
         if (serverList.size() == 1) {
@@ -59,7 +71,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
         return serverList;
     }
 
-    private void printCurrentServerStatus() {
+    private void printCurrentServerStatus() throws RemoteException {
 
         Logging.printInfo("Current Gamer Status!!!!");
         for (IGame iGame : serverList) {

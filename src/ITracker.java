@@ -1,3 +1,5 @@
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
@@ -13,6 +15,8 @@ public interface ITracker extends Remote {
 
     List<IGame> getServerList() throws RemoteException;
 
+    GameStatus test(GameStatus gameStatus) throws RemoteException;
+
     /**
      * Player call tracker to join game
      *
@@ -20,7 +24,7 @@ public interface ITracker extends Remote {
      * @return
      * @throws RemoteException
      */
-    List<IGame> joinGame(IGame game) throws RemoteException;
+    //List<IGame> joinGame(IGame game) throws RemoteException;
 
     /**
      *
@@ -35,4 +39,5 @@ public interface ITracker extends Remote {
      */
     void setServerList(List<IGame> serverList) throws RemoteException;
 
+    List<IGame> joinGame(String playerId) throws RemoteException, MalformedURLException, NotBoundException;
 }

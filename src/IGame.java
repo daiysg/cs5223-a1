@@ -1,17 +1,22 @@
 
 
+import java.net.MalformedURLException;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 public interface IGame extends Remote {
 
-    void setMaster(Boolean master);
+    void setMaster(Boolean master) throws RemoteException;
+
+    void setGameList(List<IGame> gameList) throws RemoteException;
 
     /**
      * Message will send to all player
      *
      */
-    void askTrackerJoinGame() throws RemoteException;
+    void askTrackerJoinGame() throws RemoteException, NotBoundException, MalformedURLException;
 
     /**
      * health check
@@ -73,17 +78,17 @@ public interface IGame extends Remote {
 
     GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException, WrongGameException;
 
-    void setSlave(Boolean slave);
+    void setSlave(Boolean slave) throws RemoteException;
 
-    String getId();
+    String getId() throws RemoteException;
 
-    boolean getIsMaster();
+    boolean getIsMaster() throws RemoteException;
 
-    boolean getIsSlave();
+    boolean getIsSlave() throws RemoteException;
 
-    void setServerGameStatus(GameStatus serverGameStatus);
+    void setServerGameStatus(GameStatus serverGameStatus) throws RemoteException;
 
-    void setGameStart(Boolean gameStart);
+    void setGameStart(Boolean gameStart) throws RemoteException;
 
-    GameStatus getServerGameStatus();
+    GameStatus getServerGameStatus() throws RemoteException;
 }
