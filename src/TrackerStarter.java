@@ -17,17 +17,6 @@ public class TrackerStarter {
     }
 
     private static void createTracker(ITracker tracker) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
-       /* System.setProperty(
-                "java.rmi.server.codebase",
-                Tracker.class.getProtectionDomain().getCodeSource().getLocation().toString());
-        Registry registry = LocateRegistry.getRegistry();
-        try {
-            registry.bind("tracker", tracker);
-        } catch (AlreadyBoundException e) {
-            registry.unbind("tracker");
-            registry.bind("tracker", tracker);
-        }*/
-
         Naming.rebind("tracker", tracker);
         Logging.printInfo("Tracker is Created");
     }
