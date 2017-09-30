@@ -40,7 +40,7 @@ public class Game implements IGame, Serializable {
     //add synchronize if change
     private GameStatus serverGameStatus;
 
-    //timer for pingh
+    //timer for ping
     protected Timer pingTimer;
 
     /**
@@ -53,6 +53,12 @@ public class Game implements IGame, Serializable {
      * (This is run separately so as not to block other operations.)
      */
     private Thread gameInputThread;
+
+    /**
+     * The thread is used by Master player to ping all players
+     */
+
+    private Thread masterPingThread;
 
     private Boolean gameStart = false;
 
@@ -72,6 +78,8 @@ public class Game implements IGame, Serializable {
         tracker.joinGame(this);
         if (gameList.size() == 0) {
             isMaster = true;
+        } else if (gameList.size() == 1){
+            isSlave = true;
         }
     }
 
@@ -81,7 +89,7 @@ public class Game implements IGame, Serializable {
     }
 
     /**
-     * slave call master
+     * Slave ping Master to check whether Master is still alive
      */
     @Override
     public void pingMaster() throws RemoteException, WrongGameException {
@@ -111,6 +119,7 @@ public class Game implements IGame, Serializable {
     @Override
     public synchronized void assignNewSlave(GameStatus gameStatus) throws RemoteException {
 
+        //only Master can assign new Slave
         if (isMaster) {
             int i = 1;
             // for loop for first slave with response
@@ -157,13 +166,19 @@ public class Game implements IGame, Serializable {
     @Override
     public synchronized void slaveBecomeMaster() throws RemoteException {
         if (isSlave) {
+            isSlave = false;
             isMaster = true;
 
             gameList = gameList.subList(1, gameList.size());
             serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> gamer.getId()).collect(Collectors.toList()));
             tracker.setServerList(gameList);
-            assignNewSlave(serverGameStatus);
+            try {
+                assignNewSlave(serverGameStatus);
+            } catch (Exception e) {
+                Logging.printError("Failed to assign new Slave. ");
+            }
         }
+
     }
 
     @Override
@@ -214,6 +229,7 @@ public class Game implements IGame, Serializable {
                         Logging.printInfo("Game start for player :" + playerId);
                         movePlayerInput();
                     } catch (Exception e) {
+
                     }
                 }
             }
@@ -243,6 +259,8 @@ public class Game implements IGame, Serializable {
         } while ("".equals(input));
         String move = input.replaceAll("\n", "");
         Direction direction = Direction.getDirection(move);
+
+        //Player sends move request to Master
         Logging.printInfo("Your input Direction:" + direction.getDirecton() + " for player ID " + playerId);
         GameView.printGameSummary(serverGameStatus, playerId);
          //Ask for player move
@@ -255,23 +273,17 @@ public class Game implements IGame, Serializable {
             GameView.printGameSummary(serverGameStatus, playerId);
             numOfStep++;
         } catch (Exception ex) {
-            //Master Failed, call slave
-            gameList = gameList.subList(1, gameList.size()); //remove failed master
-            IGame slave = getSlave();
-            try {
-                if (slave != null) {
-                    slave.move(playerId, direction, numOfStep);
-                    numOfStep++;
-                } else {
-                    Logging.printError("No master No slave, move failed. Need to get need GameList from Tracker");
-                    gameList = tracker.getServerList();
-                }
-            } catch (Exception e) {
-                Logging.printError("No master No slave, move failed. Need to get need GameList from Tracker");
-                gameList = tracker.getServerList();
+            //Master Failed, Slave becomes new Master
+            Logging.printInfo("Master is down.");
+            IGame newMaster = this.getSlave();
+            if (newMaster != null) {
+                //update slave game status
+                newMaster.slaveBecomeMaster();
+                GameStatus gameStatus = newMaster.move(this.playerId, direction, numOfStep);
+                this.serverGameStatus = gameStatus;
+                numOfStep++;
             }
         }
-
     }
 
     @Override
@@ -294,7 +306,7 @@ public class Game implements IGame, Serializable {
             try {
                 slave.updateGameStatus(serverGameStatus);
             } catch (Exception ex) {
-                //slave not valie, need to assign new slave;
+                //slave is down, need to assign new slave;
                 assignNewSlave(serverGameStatus);
             }
 
@@ -326,7 +338,6 @@ public class Game implements IGame, Serializable {
 
                     }
                 }
-                newMaster.assignNewSlave(serverGameStatus);
             }
         } else if (isSlave) {
             // slave wants to quit the game
