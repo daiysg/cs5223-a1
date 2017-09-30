@@ -182,13 +182,10 @@ public class Game implements IGame, Serializable {
 
         //gameList = 1 means need to init game status for master
         if (gameList.size() == 1) {
-            Logging.printInfo("Master init game status");
+            Logging.printInfo("Master init game status, player ID:" + game.getId());
             initGameStatus();
-        } else {
-            //otherwise need to prepare new game status for new player
-            Logging.printInfo("Master Prepare game status for new player");
-            serverGameStatus.prepareForNewPlayer(game.getId());
         }
+        serverGameStatus.prepareForNewPlayer(game.getId());
 
         gameStatusUpdatePlayerList();
 
