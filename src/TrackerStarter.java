@@ -20,7 +20,7 @@ public class TrackerStarter {
     private static void createTracker(ITracker tracker) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
 
         String url = new String("rmi://localhost:" + tracker.getPort() + "/tracker");
-        Logging.printDebug("tracker url = " + url.toString());
+        Logging.printDebug("tracker binding url = " + url.toString());
 
         Naming.rebind(url, tracker);
         Logging.printInfo("Tracker is Created");

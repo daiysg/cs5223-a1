@@ -318,7 +318,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     try {
                         //TODO:master to ping all players
                     } catch (Exception e) {
-                        //1TODO: to remove crashed player
+                        //TODO: to remove crashed player
                     }
                 }
             }
