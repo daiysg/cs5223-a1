@@ -1,20 +1,21 @@
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
 /**
  * Created by ydai on 16/9/17.
  */
-public interface ITracker {
+public interface ITracker extends Remote {
 
-    Integer getN();
+    Integer getN() throws RemoteException;
 
-    Integer getK();
+    Integer getK() throws RemoteException;
 
-    List<IGame> getServerList();
+    List<IGame> getServerList() throws RemoteException;
 
     /**
-     *
      * Player call tracker to join game
+     *
      * @param game
      * @return
      * @throws RemoteException
@@ -27,10 +28,11 @@ public interface ITracker {
     void initGame(int n, int k) throws RemoteException;
 
     /**
-     *
      * master update Tracker with new Game List
      * Get the player list
+     *
      * @param serverList
-     */ void setServerList(List<IGame> serverList);
+     */
+    void setServerList(List<IGame> serverList) throws RemoteException;
 
 }
