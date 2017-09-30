@@ -76,9 +76,15 @@ public interface IGame extends Remote {
 
     String getId();
 
+    boolean getIsMaster();
+
+    boolean getIsSlave();
+
     Player getPlayer();
 
     void setServerGameStatus(GameStatus serverGameStatus);
 
     void setGameStart(Boolean gameStart);
+
+    GameStatus getServerGameStatus();
 }
