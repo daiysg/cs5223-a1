@@ -71,7 +71,6 @@ public class Game implements IGame, Serializable {
         gameList = new ArrayList<>();
         this.playerId = playerId;
         askTrackerJoinGame();
-        startGame(serverGameStatus);
     }
 
     @Override
@@ -246,26 +245,35 @@ public class Game implements IGame, Serializable {
 
         Logging.printInfo("Prepare for user input for move. Player :" + playerId);
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        String input;
+        String input = "";
         do {
             try {
                 while (!br.ready()) {
                     Thread.sleep(200);
                 }
                 input = br.readLine();
+                Logging.printInfo("Waiting for your input for Player :" + playerId);
             } catch (InterruptedException e) {
                 return;
             }
         } while ("".equals(input));
         String move = input.replaceAll("\n", "");
         Direction direction = Direction.getDirection(move);
+<<<<<<< HEAD
 
         //Player sends move request to Master
+=======
+        Logging.printInfo("Your input Direction:" + direction.getDirecton() + " for player ID " + playerId);
+        GameView.printGameSummary(serverGameStatus, playerId);
+         //Ask for player move
+>>>>>>> 269e124b132f59562085fce71465ddf22e25b613
         IGame master = getMaster();
-
         try {
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
             this.serverGameStatus = gameStatus;
+
+            Logging.printInfo("Your move is finished :" + direction.getDirecton() + " for player ID " + playerId);
+            GameView.printGameSummary(serverGameStatus, playerId);
             numOfStep++;
         } catch (Exception ex) {
             //Master Failed, Slave becomes new Master
@@ -290,6 +298,8 @@ public class Game implements IGame, Serializable {
         if (direction == Direction.QUIT) {
             quitGame(playerId);
         }
+
+        Logging.printInfo("Player ID " + playerId + " is asking for Move. Direction:" + direction + " master:" + this.playerId);
 
         serverGameStatus.movePlayer(playerId, direction, numOfStep);
 

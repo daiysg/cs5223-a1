@@ -49,6 +49,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
         // first join in, the gamer join in is master
         Logging.printInfo("ASK start to joining game");
         if (serverList.size() == 0) {
+            Logging.printInfo("Master to add new Player~~~");
             serverList = game.addNewPlayer(game);
         } else {
             for (int i = 0; i < serverList.size(); i++) {

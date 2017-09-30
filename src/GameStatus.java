@@ -38,6 +38,7 @@ public class GameStatus implements Serializable {
      */
     public Map<String, Integer> playerLastMoveMap;
 
+
     /**
      * A mapping of player id to the number of treasures collected.
      */
@@ -58,7 +59,7 @@ public class GameStatus implements Serializable {
         }
     }
 
-    public void prepareForNewPlayer(String playerId) {
+    public synchronized void prepareForNewPlayer(String playerId) {
 
         //1. assign random position for new Player
         Position position = getAvailRandomPosition();
@@ -132,6 +133,10 @@ public class GameStatus implements Serializable {
 
             Logging.printInfo("Treasure Aquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
         }
+
+
+
+
     }
 
     private void randomAssignTreasure() {
@@ -176,11 +181,35 @@ public class GameStatus implements Serializable {
         playerTreasureMap.remove(playerId);
     }
 
+    public int getGridSize() {
+        return gridSize;
+    }
+
+    public int getTotalTreasures() {
+        return totalTreasures;
+    }
+
+    public Map<String, Integer> getPlayerTreasureMap() {
+        return playerTreasureMap;
+    }
+
+    public Map<String, Position> getPlayerPositionMap() {
+        return playerPositionMap;
+    }
+
 
     // Method for update player list by removing the unexists player List
     public void updatePlayerList(List<String> existPlayerList) {
         Set<String> playerIdSet = playerPositionMap.keySet();
         playerIdSet.removeAll(existPlayerList);
         playerIdSet.parallelStream().forEach(playerId -> playerQuit(playerId));
+    }
+
+    public String getPlayerAt(int j, int i) {
+        return playerPositionList[j][i];
+    }
+
+    public int getTreasureAt(int j, int i) {
+        return treasurePostion[j][i];
     }
 }
