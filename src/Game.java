@@ -4,6 +4,7 @@ import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -86,10 +87,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         startGameThread();
     }
 
-    private void askMasterToJoinGame() throws RemoteException {
+    private void askMasterToJoinGame() throws RemoteException, MalformedURLException, NotBoundException {
 
         Logging.printInfo("Current Number of Players " + gameList.size());
-        IGame master = gameList.get(0);
 
         if (isMaster) {
             //prepare for master start
@@ -97,7 +97,8 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             serverGameStatus.prepareForNewPlayer(playerId);
             startGame(serverGameStatus);
         } else {
-            master.addNewPlayer(this);
+            IGame master = gameList.get(0);
+            master.addNewPlayer(this.playerId);
         }
 
     }
@@ -220,21 +221,24 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     }
 
     @Override
-    public synchronized boolean addNewPlayer(IGame game) throws RemoteException {
+    public synchronized boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException {
 
         //if the player is not master, it means tracker call wrong gamer
         if (!isMaster) {
             Logging.printError("Call wrong master to add new Player!!! Player ID + " + playerId);
             return false;
         }
+
+        String url = new String("rmi://localhost/"+ playerId);
+        IGame game = (IGame) Naming.lookup(url);
         gameList.add(game);
 
         //gameList = 1 means need to init game status for master
         if (gameList.size() == 1) {
-            Logging.printInfo("Master init game status, player ID:" + game.getId());
+            Logging.printInfo("Master init game status, player ID:" + playerId);
             initGameStatus();
         }
-        serverGameStatus.prepareForNewPlayer(game.getId());
+        serverGameStatus.prepareForNewPlayer(playerId);
 
         gameStatusUpdatePlayerList();
 

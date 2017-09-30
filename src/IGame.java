@@ -53,7 +53,7 @@ public interface IGame extends Remote {
      * @param game
      * @throws RemoteException
      */
-    boolean addNewPlayer(IGame game) throws RemoteException;
+    boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException;
 
     /**
      * Master call player game start
