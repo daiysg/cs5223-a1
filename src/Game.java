@@ -105,7 +105,10 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             IGame master = gameList.get(0);
             master.addNewPlayer(this.playerId);
         }
-        GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId());
+        if (getSlave() == null)
+            GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId(), "");
+        else
+            GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId(), getSlave().getId());
     }
 
     @Override
@@ -276,6 +279,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         int n = tracker.getN();
         int k = tracker.getK();
 
+
         serverGameStatus = new GameStatus(n, k);
     }
 
@@ -352,6 +356,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         String input = "";
         do {
             try {
+                Logging.printInfo("Player " + playerId + ", please enter your input (0: refresh, 1: West, 2: South, 3: East, 4: North, 9: Quit)");
                 while (!br.ready()) {
                     Thread.sleep(200);
                 }
@@ -372,7 +377,10 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         try {
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
             this.serverGameStatus = gameStatus;
-            GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId());
+            if (getSlave() == null)
+                GameView.printGameSummary(serverGameStatus, playerId, master.getId(), "");
+            else
+                GameView.printGameSummary(serverGameStatus, playerId, master.getId(), getSlave().getId());
             Logging.printInfo("Your move is finished :" + direction.getDirecton() + " for player ID " + playerId);
             numOfStep++;
         } catch (Exception ex) {
