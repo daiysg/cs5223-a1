@@ -1,8 +1,8 @@
+import java.net.MalformedURLException;
 import java.rmi.AlreadyBoundException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
 public class GameStarter {
     /**
@@ -14,20 +14,26 @@ public class GameStarter {
      * @throws InterruptedException
      */
     public static void main(String[] args)
-            throws RemoteException, NotBoundException,AlreadyBoundException, InterruptedException {
+            throws RemoteException, NotBoundException, AlreadyBoundException, InterruptedException, MalformedURLException {
         // Get host and port
-        String host = args.length > 0 ? args[0] : "localhost";
-        int port = args.length > 1 ? Integer.parseInt(args[1]) : 1099;
-        String playerId = args.length > 2 ? args[2] : "test";
-        createAndConnectToTracker(host, port, playerId);
+        String host = args.length > 0 ? args[0] : null;
+        String playerId = args.length > 1 ? args[1] : "test";
+        createAndConnectToTracker(host, playerId);
     }
 
-    private static void createAndConnectToTracker(String host, int port, String playerId)
-            throws RemoteException, NotBoundException, InterruptedException, AlreadyBoundException {
-        Registry registry = LocateRegistry.getRegistry(host, port);
-        ITracker tracker = (ITracker) registry.lookup("tracker");
+    private static void createAndConnectToTracker(String host, String playerId)
+            throws RemoteException, NotBoundException, InterruptedException, AlreadyBoundException, MalformedURLException {
+     /*   Registry registry = LocateRegistry.getRegistry(host);
+
+        Logging.printInfo("Ready for finding tracker!!");
+        Tracker tracker = (Tracker) registry.lookup("tracker");
+
+        Logging.printInfo("Found tracker!!");*/
+        Logging.printInfo("Ready for finding tracker!!");
+        String url = new String("rmi://localhost/tracker");
+        ITracker tracker = (ITracker) Naming.lookup(url);
+        Logging.printInfo("Found tracker!!");
         Game game = new Game(tracker, playerId);
-        game.askTrackerJoinGame();
     }
 
 }

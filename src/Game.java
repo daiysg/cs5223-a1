@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -14,7 +15,12 @@ import java.util.Timer;
  * <p>
  * Refer to Peer
  */
-public class Game implements IGame {
+public class Game implements IGame, Serializable {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     //playerId which is the name of this game
     private String playerId;
@@ -107,7 +113,7 @@ public class Game implements IGame {
      * Master assign new slave if slave down
      */
     @Override
-    public void assignNewSlave(GameStatus gameStatus) {
+    public void assignNewSlave(GameStatus gameStatus) throws RemoteException {
 
         if (isMaster) {
             int i = 1;
@@ -137,7 +143,7 @@ public class Game implements IGame {
     }
 
     //assign game status to new Slave
-    private synchronized GameStatus reassignedGameStatusForNewSlave(int i) {
+    private synchronized GameStatus reassignedGameStatusForNewSlave(int i) throws RemoteException {
         List stillAvailGameList = gameList.subList(i, gameList.size());
         gameList = new ArrayList<>();
         gameList.add(this);
@@ -193,7 +199,7 @@ public class Game implements IGame {
         return gameList;
     }
 
-    private void initGameStatus() {
+    private void initGameStatus() throws RemoteException {
         int n = tracker.getN();
         int k = tracker.getK();
 
@@ -335,7 +341,7 @@ public class Game implements IGame {
     /**
      * Heartbeat to players
      */
-    private void pingAllPlayer() {
+    private void pingAllPlayer() throws RemoteException {
 
         List<IGame> updatedGameList = new ArrayList<>();
 

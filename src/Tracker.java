@@ -8,19 +8,25 @@ import java.util.List;
  * Created by ydai on 9/9/17.
  */
 public class Tracker extends UnicastRemoteObject implements ITracker {
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
     private List<IGame> serverList;
 
     private Integer n;
     private Integer k;
 
     @Override
-    public Integer getN() {
+    public Integer getN() throws RemoteException {
         return n;
     }
 
 
     @Override
-    public Integer getK() {
+    public Integer getK() throws RemoteException {
         return k;
     }
 
@@ -33,7 +39,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
 
 
     @Override
-    public List<IGame> getServerList() {
+    public List<IGame> getServerList() throws RemoteException {
         return serverList;
     }
 
@@ -59,7 +65,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker {
     }
 
     @Override
-    public void setServerList(List<IGame> serverList) {
+    public void setServerList(List<IGame> serverList) throws RemoteException {
         this.serverList = serverList;
     }
 }
