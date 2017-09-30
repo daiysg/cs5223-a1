@@ -55,7 +55,7 @@ public class GameStatus implements Serializable {
 
         //assign treasure
         for (int i = 0; i < totalTreasures; i++) {
-            randomAssignTreasure(1);
+            randomAssignTreasure();
         }
     }
 
@@ -82,12 +82,16 @@ public class GameStatus implements Serializable {
         Position candidatePosition;
         do {
             candidatePosition = getRandomPosition();
-        } while (!isVacantCell(candidatePosition.getX(), candidatePosition.getY()));
+        } while (!isPlayerVacantCell(candidatePosition.getX(), candidatePosition.getY()));
         return candidatePosition;
     }
 
-    private boolean isVacantCell(int x, int y) {
+    private boolean isPlayerVacantCell(int x, int y) {
         return this.playerPositionList[x][y] == null;
+    }
+
+    private boolean isTreasureVacantCell(int x, int y) {
+        return this.treasurePostion[x][y] != 1;
     }
 
     public void movePlayer(String playerId, Direction direction, int numOfStep) {
@@ -124,7 +128,7 @@ public class GameStatus implements Serializable {
 
         if (numTreasures > 0) {
             this.treasurePostion[newPosition.getX()][newPosition.getY()] = 0;
-            randomAssignTreasure(numTreasures);
+            randomAssignTreasure();
             this.playerTreasureMap.put(playerId, playerTreasureMap.get(playerId) + numTreasures);
 
             Logging.printInfo("Treasure Aquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
@@ -135,14 +139,17 @@ public class GameStatus implements Serializable {
 
     }
 
-    private void randomAssignTreasure(int numTreasures) {
+    private void randomAssignTreasure() {
         Position position = getAvailRandomPosition();
-        treasurePostion[position.getX()][position.getY()] = numTreasures;
+        while (!isTreasureVacantCell(position.getX(), position.getY())){
+            position = getAvailRandomPosition();
+        }
+        treasurePostion[position.getX()][position.getY()] = 1;
     }
 
     private boolean checkValidPosition(Position newPosition) {
         return isValidCell(newPosition.getX(), newPosition.getY()) &&
-                isVacantCell(newPosition.getX(), newPosition.getY());
+                isPlayerVacantCell(newPosition.getX(), newPosition.getY());
     }
 
     private boolean isValidCell(Integer x, Integer y) {
