@@ -259,14 +259,11 @@ public class Game implements IGame, Serializable {
         } while ("".equals(input));
         String move = input.replaceAll("\n", "");
         Direction direction = Direction.getDirection(move);
-<<<<<<< HEAD
 
         //Player sends move request to Master
-=======
         Logging.printInfo("Your input Direction:" + direction.getDirecton() + " for player ID " + playerId);
         GameView.printGameSummary(serverGameStatus, playerId);
          //Ask for player move
->>>>>>> 269e124b132f59562085fce71465ddf22e25b613
         IGame master = getMaster();
         try {
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
