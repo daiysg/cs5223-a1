@@ -32,7 +32,7 @@ public class Game implements IGame {
     //add synchronize if change
     private GameStatus serverGameStatus;
 
-    //timer for pingh
+    //timer for ping
     protected Timer pingTimer;
 
     /**
@@ -69,6 +69,8 @@ public class Game implements IGame {
         tracker.joinGame(this);
         if (gameList.size() == 0) {
             isMaster = true;
+        } else if (gameList.size() == 1){
+            isSlave = true;
         }
     }
 
