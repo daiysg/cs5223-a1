@@ -58,6 +58,12 @@ public class Game implements IGame, Serializable {
      */
     private Thread gameInputThread;
 
+    /**
+     * The thread is used by Master player to ping all players
+     */
+
+    private Thread masterPingThread;
+
     private Boolean gameStart = false;
 
     private Integer numOfStep = 0;
@@ -87,7 +93,7 @@ public class Game implements IGame, Serializable {
     }
 
     /**
-     * slave call master
+     * Slave ping Master to check whether Master is still alive
      */
     @Override
     public void pingMaster() throws RemoteException, WrongGameException {
@@ -117,6 +123,7 @@ public class Game implements IGame, Serializable {
     @Override
     public void assignNewSlave(GameStatus gameStatus) throws RemoteException {
 
+        //only Master can assign new Slave
         if (isMaster) {
             int i = 1;
             // for loop for first slave with response
@@ -163,13 +170,19 @@ public class Game implements IGame, Serializable {
     @Override
     public synchronized void slaveBecomeMaster() throws RemoteException {
         if (isSlave) {
+            isSlave = false;
             isMaster = true;
 
             gameList = gameList.subList(1, gameList.size());
             serverGameStatus.setPlayerHashMap(Utils.convertGameListToPlayerHashMap(gameList));
             tracker.setServerList(gameList);
-            assignNewSlave(serverGameStatus);
+            try {
+                assignNewSlave(serverGameStatus);
+            } catch (Exception e) {
+                Logging.printError("Failed to assign new Slave. ");
+            }
         }
+
     }
 
     @Override
@@ -217,6 +230,7 @@ public class Game implements IGame, Serializable {
                         Logging.printInfo("Game start for player :" + playerId);
                         movePlayerInput();
                     } catch (Exception e) {
+
                     }
                 }
             }
@@ -246,7 +260,7 @@ public class Game implements IGame, Serializable {
         String move = input.replaceAll("\n", "");
         Direction direction = Direction.getDirection(move);
 
-        //Ask for player move
+        //Player sends move request to Master
         IGame master = getMaster();
 
         try {
@@ -254,23 +268,17 @@ public class Game implements IGame, Serializable {
             this.serverGameStatus = gameStatus;
             numOfStep++;
         } catch (Exception ex) {
-            //Master Failed, call slave
-            gameList = gameList.subList(1, gameList.size()); //remove failed master
-            IGame slave = getSlave();
-            try {
-                if (slave != null) {
-                    slave.move(playerId, direction, numOfStep);
-                    numOfStep++;
-                } else {
-                    Logging.printError("No master No slave, move failed. Need to get need GameList from Tracker");
-                    gameList = tracker.getServerList();
-                }
-            } catch (Exception e) {
-                Logging.printError("No master No slave, move failed. Need to get need GameList from Tracker");
-                gameList = tracker.getServerList();
+            //Master Failed, Slave becomes new Master
+            Logging.printInfo("Master is down.");
+            IGame newMaster = this.getSlave();
+            if (newMaster != null) {
+                //update slave game status
+                newMaster.slaveBecomeMaster();
+                GameStatus gameStatus = newMaster.move(this.playerId, direction, numOfStep);
+                this.serverGameStatus = gameStatus;
+                numOfStep++;
             }
         }
-
     }
 
     @Override
@@ -291,7 +299,7 @@ public class Game implements IGame, Serializable {
             try {
                 slave.updateGameStatus(serverGameStatus);
             } catch (Exception ex) {
-                //slave not valie, need to assign new slave;
+                //slave is down, need to assign new slave;
                 assignNewSlave(serverGameStatus);
             }
 
@@ -323,7 +331,6 @@ public class Game implements IGame, Serializable {
 
                     }
                 }
-                newMaster.assignNewSlave(serverGameStatus);
             }
         }
         else if (isSlave) {
