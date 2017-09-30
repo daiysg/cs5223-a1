@@ -34,9 +34,12 @@ public class GameStarter {
         Logging.printInfo("Found tracker!!");*/
         Logging.printInfo("Ready for finding tracker!!");
         String url = new String("rmi://" + host + ":" + port + "/tracker");
+        Logging.printInfo("lookup url = " + url.toString());
+
         ITracker tracker = (ITracker) Naming.lookup(url);
         Logging.printInfo("Found tracker!!");
         Naming.rebind("tracker", tracker);
+
         Game game = new Game(playerId);
         Naming.rebind(playerId, game);
         game.connectToTracker(tracker);

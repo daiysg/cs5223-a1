@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface ITracker extends Remote {
 
+    Integer getPort() throws RemoteException;
+
     Integer getN() throws RemoteException;
 
     Integer getK() throws RemoteException;
