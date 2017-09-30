@@ -18,12 +18,13 @@ public class GameStarter {
     public static void main(String[] args)
             throws RemoteException, NotBoundException, AlreadyBoundException, InterruptedException, MalformedURLException {
         // Get host and port
-        String host = args.length > 0 ? args[0] : null;
-        String playerId = args.length > 1 ? args[1] : "test" + new Random(100).nextInt();
-        createAndConnectToTracker(host, playerId);
+        String host = args.length > 0 ? args[0] : "localhost";
+        String port = args.length > 1? args[1] : "1099";
+        String playerId = args.length > 2 ? args[2] : "zz";
+        createAndConnectToTracker(host, port, playerId);
     }
 
-    private static void createAndConnectToTracker(String host, String playerId)
+    private static void createAndConnectToTracker(String host, String port, String playerId)
             throws RemoteException, NotBoundException, InterruptedException, AlreadyBoundException, MalformedURLException {
      /*   Registry registry = LocateRegistry.getRegistry(host);
 
@@ -32,7 +33,7 @@ public class GameStarter {
 
         Logging.printInfo("Found tracker!!");*/
         Logging.printInfo("Ready for finding tracker!!");
-        String url = new String("rmi://localhost/tracker");
+        String url = new String("rmi://" + host + ":" + port + "/tracker");
         ITracker tracker = (ITracker) Naming.lookup(url);
         Logging.printInfo("Found tracker!!");
         Game game = new Game(tracker, playerId);
