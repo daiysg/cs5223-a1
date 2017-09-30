@@ -25,7 +25,7 @@ public interface IGame extends Remote {
 
 
     /**
-     * slave call master
+     * Slave to check whether Master is alive
      */
     void pingMaster() throws RemoteException, WrongGameException;
 

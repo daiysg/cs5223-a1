@@ -63,10 +63,14 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     private Thread gameInputThread;
 
     /**
-     * The thread is used by Master player to ping all players
+     * The thread is used by Master to ping all players
      */
-
     private Thread masterPingThread;
+
+    /**
+     * The thread is used by Slave to ping Master
+     */
+    private Thread slavePingThread;
 
     private Boolean gameStart = false;
 
@@ -96,6 +100,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             initGameStatus();
             serverGameStatus.prepareForNewPlayer(playerId);
             startGame(serverGameStatus);
+            startMasterPingThread();
         } else {
             IGame master = gameList.get(0);
             master.addNewPlayer(this.playerId);
@@ -117,11 +122,28 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     @Override
     public void ping() throws RemoteException {
-        Logging.printInfo("Ping from master to Player: " + playerId);
+        return;
     }
 
     /**
-     * Slave ping Master to check whether Master is still alive
+     * Master to ping all players to check whether they are still alive
+     */
+//    @Override
+    public void pingAllPlayers() throws RemoteException, WrongGameException {
+        Logging.printInfo("Ping from master to Player: " + playerId);
+        if (!isMaster) {
+            Logging.printError("Wrong Master to ping all players!!! Player ID + " + playerId);
+            return;
+        }
+
+
+
+
+
+    }
+
+    /**
+     * Slave to ping Master to check whether Master is still alive
      */
     @Override
     public void pingMaster() throws RemoteException, WrongGameException {
@@ -280,6 +302,43 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             }
         };
         this.gameInputThread.start();
+    }
+
+    public synchronized void startMasterPingThread() throws RemoteException {
+
+        Logging.printInfo("Start masterPingThread for player" + playerId);
+
+        this.masterPingThread = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        //TODO:master to ping all players
+                    } catch (Exception e) {
+                        //1TODO: to remove crashed player
+                    }
+                }
+            }
+        };
+        this.masterPingThread.start();
+    }
+
+
+    public synchronized void startSlavePingThread() throws RemoteException {
+
+        Logging.printInfo("Start slavePingThread for player" + playerId);
+
+        this.slavePingThread = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        //TODO: Slave to ping Master
+                    } catch (Exception e) {
+                        //TODO: Slave becomes new Master
+                    }
+                }
+            }
+        };
+        this.slavePingThread.start();
     }
 
     private void movePlayerInput() throws InterruptedException, IOException, WrongGameException {

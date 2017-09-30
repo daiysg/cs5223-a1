@@ -63,7 +63,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
         String url = new String("rmi://localhost:" + port + "/"+ playerId);
-        Logging.printInfo("lookup url = " + url.toString());
+        Logging.printDebug("lookup url = " + url.toString());
 
         IGame game = (IGame) Naming.lookup(url);
 
