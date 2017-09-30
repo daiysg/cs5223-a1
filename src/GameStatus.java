@@ -21,7 +21,12 @@ public class GameStatus implements Serializable {
     /**
      * players position List.
      */
-    private Player[][] playerPosition;
+    private String[][] playerPositionList;
+
+    /**
+     * player position Map
+     */
+    private Map<String, Position> playerPositionMap;
 
     /**
      * Treasure Position
@@ -34,11 +39,6 @@ public class GameStatus implements Serializable {
     public Map<String, Integer> playerLastMoveMap;
 
     /**
-     * A mapping of player id to the player object.
-     */
-    private Map<String, Player> playerHashMap;
-
-    /**
      * A mapping of player id to the number of treasures collected.
      */
     private Map<String, Integer> playerTreasureMap;
@@ -46,10 +46,11 @@ public class GameStatus implements Serializable {
     public GameStatus(int n, int k) {
         this.gridSize = n;
         this.totalTreasures = k;
-        this.playerHashMap = new HashMap<>();
         this.playerTreasureMap = new HashMap<>();
-        this.playerPosition = new Player[gridSize][gridSize];
+        this.playerPositionList = new String[gridSize][gridSize];
         this.playerLastMoveMap = new HashMap<>();
+        this.playerPositionMap = new HashMap<>();
+        this.treasurePostion = new int[gridSize][gridSize];
 
         //assign treasure
         for (int i = 0; i < totalTreasures; i++) {
@@ -57,25 +58,15 @@ public class GameStatus implements Serializable {
         }
     }
 
-    public Map<String, Player> getPlayerHashMap() {
-        return playerHashMap;
-    }
-
-    public void setPlayerHashMap(Map<String, Player> playerHashMap) {
-        this.playerHashMap = playerHashMap;
-    }
-
-    public void prepareForNewPlayer(Player player) {
+    public void prepareForNewPlayer(String playerId) {
 
         //1. assign random position for new Player
         Position position = getAvailRandomPosition();
-        player.setPosition(position);
-        playerPosition[position.getX()][position.getY()] = player;
+        playerPositionMap.put(playerId, position);
+        playerPositionList[position.getX()][position.getY()] = playerId;
 
-        //2. add new player into playerMap and player last move map, player treasuremap
-        playerHashMap.put(player.getId(), player);
-        playerLastMoveMap.put(player.getId(), 0);
-        playerTreasureMap.put(player.getId(), 0);
+        playerLastMoveMap.put(playerId, 0);
+        playerTreasureMap.put(playerId, 0);
     }
 
 
@@ -95,19 +86,18 @@ public class GameStatus implements Serializable {
     }
 
     private boolean isVacantCell(int x, int y) {
-        return this.playerPosition[x][y] == null;
+        return this.playerPositionList[x][y] == null;
     }
 
     public void movePlayer(String playerId, Direction direction, int numOfStep) {
-        Player player = this.playerHashMap.get(playerId);
-        Position position = player.getPosition();
+        Position position = this.playerPositionMap.get(playerId);
 
         if (position == null) {
             return;
         }
 
         //check if this move is been executed
-        if (playerLastMoveMap.get(player.getId()) >= numOfStep) {
+        if (playerLastMoveMap.get(playerId) >= numOfStep) {
             Logging.printError("THis move is exectued already!!!");
             return;
         }
@@ -121,12 +111,12 @@ public class GameStatus implements Serializable {
         }
 
         // Update player's position.
-        playerPosition[player.getPosition().getX()][player.getPosition().getY()] = null;
-        player.setPosition(newPosition);
-        playerPosition[newPosition.getX()][newPosition.getY()] = player;
+        playerPositionList[position.getX()][position.getY()] = null;
+        playerPositionMap.put(playerId, newPosition);
+        playerPositionList[newPosition.getX()][newPosition.getY()] = playerId;
 
         // Add player Last Move
-        playerLastMoveMap.put(player.getId(), numOfStep);
+        playerLastMoveMap.put(playerId, numOfStep);
 
         // Collect treasures at new position, if any.
         int numTreasures = this.treasurePostion[newPosition.getX()][newPosition.getY()];
@@ -169,16 +159,21 @@ public class GameStatus implements Serializable {
         }
     }
 
-    public void playerQuit(String playerId)
-    {
+    public void playerQuit(String playerId) {
         // remove player from playerPosition;
-        Player player = this.playerHashMap.get(playerId);
-        Position position = player.getPosition();
-        playerPosition[position.getX()][position.getY()] = null;
+        Position position = this.playerPositionMap.get(playerId);
+        playerPositionList[position.getX()][position.getY()] = null;
 
         // remove player from playerLastMoveMap
         playerLastMoveMap.remove(playerId);
-        playerHashMap.remove(playerId);
         playerTreasureMap.remove(playerId);
+    }
+
+
+    // Method for update player list by removing the unexists player List
+    public void updatePlayerList(List<String> existPlayerList) {
+        Set<String> playerIdSet = playerPositionMap.keySet();
+        playerIdSet.removeAll(existPlayerList);
+        playerIdSet.parallelStream().forEach(playerId -> playerQuit(playerId));
     }
 }

@@ -80,8 +80,6 @@ public interface IGame extends Remote {
 
     boolean getIsSlave();
 
-    Player getPlayer();
-
     void setServerGameStatus(GameStatus serverGameStatus);
 
     void setGameStart(Boolean gameStart);

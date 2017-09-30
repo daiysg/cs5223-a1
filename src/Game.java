@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
+import java.util.stream.Collectors;
 
 /**
  * Created by ydai on 16/9/17.
@@ -43,11 +44,6 @@ public class Game implements IGame, Serializable {
     protected Timer pingTimer;
 
     /**
-     * Associated Player
-     */
-    private Player player;
-
-    /**
      * Connected tracker
      */
     private ITracker tracker;
@@ -67,6 +63,7 @@ public class Game implements IGame, Serializable {
         this.tracker = tracker;
         gameStart = false;
         gameList = new ArrayList<>();
+        this.playerId = playerId;
         askTrackerJoinGame();
         startGame(serverGameStatus);
     }
@@ -81,7 +78,7 @@ public class Game implements IGame, Serializable {
 
     @Override
     public void ping() throws RemoteException {
-        Logging.printInfo("Ping from master to Player: " + player.getId());
+        Logging.printInfo("Ping from master to Player: " + playerId);
     }
 
     /**
@@ -100,13 +97,13 @@ public class Game implements IGame, Serializable {
             slaveBecomeMaster();
         }
 
-        Logging.printInfo("Ping to Master: " + player.getId());
+        Logging.printInfo("Ping to Master: " + playerId);
     }
 
     @Override
     public synchronized void updateGameStatus(GameStatus gameStatus) throws RemoteException {
         this.serverGameStatus = gameStatus;
-        Logging.printInfo("Update Game Status to Player: " + player.getId());
+        Logging.printInfo("Update Game Status to Player: " + playerId);
     }
 
     /**
@@ -150,7 +147,7 @@ public class Game implements IGame, Serializable {
         gameList.addAll(stillAvailGameList);
 
         //update PlayerHashMap
-        serverGameStatus.setPlayerHashMap(Utils.convertGameListToPlayerHashMap(gameList));
+        gameStatusUpdatePlayerList();
 
         //update Tracker Player List
         tracker.setServerList(gameList);
@@ -164,7 +161,7 @@ public class Game implements IGame, Serializable {
             isMaster = true;
 
             gameList = gameList.subList(1, gameList.size());
-            serverGameStatus.setPlayerHashMap(Utils.convertGameListToPlayerHashMap(gameList));
+            serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> gamer.getId()).collect(Collectors.toList()));
             tracker.setServerList(gameList);
             assignNewSlave(serverGameStatus);
         }
@@ -183,13 +180,18 @@ public class Game implements IGame, Serializable {
         }
         gameList.add(game);
 
-        //gameList = 1 means need to init game status
+        //gameList = 1 means need to init game status for master
         if (gameList.size() == 1) {
+            Logging.printInfo("Master init game status");
             initGameStatus();
+        } else {
+            //otherwise need to prepare new game status for new player
+            Logging.printInfo("Master Prepare game status for new player");
+            serverGameStatus.prepareForNewPlayer(game.getId());
         }
 
-        serverGameStatus.setPlayerHashMap(Utils.convertGameListToPlayerHashMap(gameList));
-        serverGameStatus.prepareForNewPlayer(game.getPlayer());
+        gameStatusUpdatePlayerList();
+
         if (gameList.size() == 2) {
             game.setSlave(true);
         }
@@ -208,6 +210,7 @@ public class Game implements IGame, Serializable {
 
     @Override
     public void startGame(GameStatus gameStatus) throws RemoteException {
+        gameStart = true;
         this.gameInputThread = new Thread() {
             public void run() {
                 while (gameStart) {
@@ -278,7 +281,7 @@ public class Game implements IGame, Serializable {
         }
 
         if (direction == Direction.QUIT) {
-          quitGame(playerId);
+            quitGame(playerId);
         }
 
         serverGameStatus.movePlayer(playerId, direction, numOfStep);
@@ -323,16 +326,14 @@ public class Game implements IGame, Serializable {
                 }
                 newMaster.assignNewSlave(serverGameStatus);
             }
-        }
-        else if (isSlave) {
+        } else if (isSlave) {
             // slave wants to quit the game
-            IGame master=this.getMaster();
+            IGame master = this.getMaster();
             master.getServerGameStatus().playerQuit(playerId);
             master.assignNewSlave(serverGameStatus);
-        }
-        else {
+        } else {
             // a normal player wants to quit the game
-            IGame master=this.getMaster();
+            IGame master = this.getMaster();
             master.getServerGameStatus().playerQuit(playerId);
         }
     }
@@ -374,6 +375,11 @@ public class Game implements IGame, Serializable {
         }
     }
 
+    private void gameStatusUpdatePlayerList() {
+        serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> gamer.getId()).collect(Collectors.toList()));
+    }
+
+
     /**
      * From master to update player and gamer status
      *
@@ -381,7 +387,7 @@ public class Game implements IGame, Serializable {
      */
     private synchronized void removeFailedGamer(IGame iGame) {
         //remove Failed Player
-        serverGameStatus.getPlayerHashMap().remove(iGame.getId());
+        serverGameStatus.playerQuit(iGame.getId());
         return;
     }
 
@@ -432,11 +438,6 @@ public class Game implements IGame, Serializable {
     @Override
     public boolean getIsSlave() {
         return isSlave;
-    }
-
-    @Override
-    public Player getPlayer() {
-        return player;
     }
 
     @Override
