@@ -20,7 +20,7 @@ public interface ITracker extends Remote {
      * @return
      * @throws RemoteException
      */
-    void joinGame(IGame game) throws RemoteException;
+    List<IGame> joinGame(IGame game) throws RemoteException;
 
     /**
      *

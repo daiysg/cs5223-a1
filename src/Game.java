@@ -69,18 +69,32 @@ public class Game implements IGame, Serializable {
         this.tracker = tracker;
         gameStart = false;
         gameList = new ArrayList<>();
+        serverGameStatus = null;
         this.playerId = playerId;
         askTrackerJoinGame();
+        askMasterToJoinGame();
+        startGameThread();
+    }
+
+    private void askMasterToJoinGame() throws RemoteException {
+
+        Logging.printInfo("Current Number of Players " + gameList.size());
+        IGame master = gameList.get(0);
+
+        if (isMaster) {
+            //prepare for master start
+            initGameStatus();
+            serverGameStatus.prepareForNewPlayer(playerId);
+            startGame(serverGameStatus);
+        } else {
+            master.addNewPlayer(this);
+        }
+
     }
 
     @Override
     public synchronized void askTrackerJoinGame() throws RemoteException {
-        tracker.joinGame(this);
-        if (gameList.size() == 0) {
-            isMaster = true;
-        } else if (gameList.size() == 1){
-            isSlave = true;
-        }
+        gameList = tracker.joinGame(this);
     }
 
     @Override
@@ -182,15 +196,12 @@ public class Game implements IGame, Serializable {
     }
 
     @Override
-    public synchronized List<IGame> addNewPlayer(IGame game) throws RemoteException {
+    public synchronized boolean addNewPlayer(IGame game) throws RemoteException {
 
-        if (game == this) {
-            isMaster = true;
-        }
         //if the player is not master, it means tracker call wrong gamer
         if (!isMaster) {
-            Logging.printError("Traker call wrong master to add new Player!!! Player ID + " + playerId);
-            return null;
+            Logging.printError("Call wrong master to add new Player!!! Player ID + " + playerId);
+            return false;
         }
         gameList.add(game);
 
@@ -207,9 +218,8 @@ public class Game implements IGame, Serializable {
             game.setSlave(true);
         }
 
-        game.setGameStart(true);
         game.startGame(serverGameStatus);
-        return gameList;
+        return true;
     }
 
     private void initGameStatus() throws RemoteException {
@@ -221,12 +231,19 @@ public class Game implements IGame, Serializable {
 
     @Override
     public synchronized void startGame(GameStatus gameStatus) throws RemoteException {
-        gameStart = true;
+        this.serverGameStatus = gameStatus;
+        this.gameStart = true;
+    }
+
+
+    public synchronized void startGameThread() throws RemoteException {
+
+        Logging.printInfo("Start game Thread for player" + playerId);
+
         this.gameInputThread = new Thread() {
             public void run() {
-                while (gameStart) {
+                while (true) {
                     try {
-                        Logging.printInfo("Game start for player :" + playerId);
                         movePlayerInput();
                     } catch (Exception e) {
 
@@ -238,12 +255,12 @@ public class Game implements IGame, Serializable {
     }
 
     private void movePlayerInput() throws InterruptedException, IOException, WrongGameException {
-        if (!gameStart) {
+
+
+        if (!gameStart || serverGameStatus == null) {
             Thread.sleep(100);
             return;
         }
-
-        Logging.printInfo("Prepare for user input for move. Player :" + playerId);
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String input = "";
         do {
@@ -262,15 +279,14 @@ public class Game implements IGame, Serializable {
 
         //Player sends move request to Master
         Logging.printInfo("Your input Direction:" + direction.getDirecton() + " for player ID " + playerId);
-        GameView.printGameSummary(serverGameStatus, playerId);
-         //Ask for player move
+        //Ask for player move
         IGame master = getMaster();
+        GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId());
         try {
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
             this.serverGameStatus = gameStatus;
 
             Logging.printInfo("Your move is finished :" + direction.getDirecton() + " for player ID " + playerId);
-            GameView.printGameSummary(serverGameStatus, playerId);
             numOfStep++;
         } catch (Exception ex) {
             //Master Failed, Slave becomes new Master
@@ -311,6 +327,8 @@ public class Game implements IGame, Serializable {
             }
 
         }
+
+        Logging.printInfo("Player ID " + playerId + " move is finished!!. Direction:" + direction + " master:" + this.playerId);
 
         return serverGameStatus;
     }
@@ -467,6 +485,12 @@ public class Game implements IGame, Serializable {
     public GameStatus getServerGameStatus() {
         return serverGameStatus;
     }
+
+    @Override
+    public void setMaster(Boolean master) {
+        isMaster = master;
+    }
+
 
 }
 

@@ -8,37 +8,12 @@ public class GameView {
      * @param game
      * @param playerId The player viewing the summary.
      */
-    public static void printGameSummary(GameStatus game, String playerId) {
+    public static void printGameSummary(GameStatus game, String playerId, String masterId) {
+        System.out.println("Status for player Id : " + playerId + " Master ID " + masterId );
+        System.out.println();
         System.out.println(GameView.getGraphicalMaze(game, playerId));
         GameView.printPlayerInformation(game, playerId);
     }
-
-    /**
-     * Prints the final game state.
-     *
-     * @param game
-     * @param playerId
-     */
-    static void printGameOverSummary(GameStatus game, String playerId) {
-        GameView.printGameSummary(game, playerId);
-        //GameView.printGameOutcome(game, playerId);
-    }
-
-  /*  static void printGameOutcome(GameStatus game, String playerId) {
-        Set<String> playerId = game();
-        ArrayList<String> playerIdsWithMaxScore = new ArrayList<String>();
-        int maxScore = 0;
-        for (Player player : players) {
-            int score = game.getPlayerTreasureCount(player.id);
-            if (score > maxScore) {
-                playerIdsWithMaxScore.clear();
-                playerIdsWithMaxScore.add(playerId);
-                maxScore = score;
-            } else if (score == maxScore) {
-                playerIdsWithMaxScore.add(player.id);
-            }
-        }
-    }*/
 
     static String getGraphicalMaze(GameStatus gameStatus, String playerId) {
         StringBuilder sb = new StringBuilder();

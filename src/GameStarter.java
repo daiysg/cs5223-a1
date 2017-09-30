@@ -19,8 +19,8 @@ public class GameStarter {
             throws RemoteException, NotBoundException, AlreadyBoundException, InterruptedException, MalformedURLException {
         // Get host and port
         String host = args.length > 0 ? args[0] : "localhost";
-        String port = args.length > 1? args[1] : "1099";
-        String playerId = args.length > 2 ? args[2] : "zz";
+        String port = args.length > 1 ? args[1] : "1099";
+        String playerId = args.length > 2 ? args[2] : "zz" + (new Random().nextInt() % 100);
         createAndConnectToTracker(host, port, playerId);
     }
 

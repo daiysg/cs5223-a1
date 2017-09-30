@@ -2,9 +2,10 @@
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.List;
 
 public interface IGame extends Remote {
+
+    void setMaster(Boolean master);
 
     /**
      * Message will send to all player
@@ -47,7 +48,7 @@ public interface IGame extends Remote {
      * @param game
      * @throws RemoteException
      */
-    List<IGame> addNewPlayer(IGame game) throws RemoteException;
+    boolean addNewPlayer(IGame game) throws RemoteException;
 
     /**
      * Master call player game start
