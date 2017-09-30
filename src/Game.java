@@ -254,6 +254,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         int n = tracker.getN();
         int k = tracker.getK();
 
+
         serverGameStatus = new GameStatus(n, k);
     }
 
