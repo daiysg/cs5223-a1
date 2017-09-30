@@ -68,7 +68,7 @@ public class Game implements IGame, Serializable {
     }
 
     @Override
-    public void askTrackerJoinGame() throws RemoteException {
+    public synchronized void askTrackerJoinGame() throws RemoteException {
         tracker.joinGame(this);
         if (gameList.size() == 0) {
             isMaster = true;
@@ -109,7 +109,7 @@ public class Game implements IGame, Serializable {
      * Master assign new slave if slave down
      */
     @Override
-    public void assignNewSlave(GameStatus gameStatus) throws RemoteException {
+    public synchronized void assignNewSlave(GameStatus gameStatus) throws RemoteException {
 
         if (isMaster) {
             int i = 1;
@@ -205,7 +205,7 @@ public class Game implements IGame, Serializable {
     }
 
     @Override
-    public void startGame(GameStatus gameStatus) throws RemoteException {
+    public synchronized void startGame(GameStatus gameStatus) throws RemoteException {
         gameStart = true;
         this.gameInputThread = new Thread() {
             public void run() {
