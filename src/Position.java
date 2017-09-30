@@ -1,7 +1,11 @@
+import java.io.Serializable;
+
 /**
  * Created by ydai on 9/9/17.
  */
-public class Position {
+public class Position implements Serializable{
+
+    private static final long serialVersionUID = 1L;
 
     private Integer x;
     private Integer y;

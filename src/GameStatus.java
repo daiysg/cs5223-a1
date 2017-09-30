@@ -66,7 +66,7 @@ public class GameStatus implements Serializable {
         playerPositionMap.put(playerId, position);
         playerPositionList[position.getX()][position.getY()] = playerId;
 
-        playerLastMoveMap.put(playerId, 0);
+        playerLastMoveMap.put(playerId, -1);
         playerTreasureMap.put(playerId, 0);
     }
 
@@ -111,8 +111,8 @@ public class GameStatus implements Serializable {
 
         boolean isValidPosition = checkValidPosition(newPosition);
         if (!isValidPosition) {
-            Logging.printError("Invalid postion after moving!! Player " + playerId + " new X:" + position.getX() + " new Y:" + position.getY());
-            return;
+            Logging.printError("Invalid postion after moving!! Player " + playerId + " new X:" + newPosition.getX() + " new Y:" + newPosition.getY());
+            newPosition = position;
         }
 
         // Update player's position.
@@ -131,7 +131,7 @@ public class GameStatus implements Serializable {
             randomAssignTreasure();
             this.playerTreasureMap.put(playerId, playerTreasureMap.get(playerId) + numTreasures);
 
-            Logging.printInfo("Treasure Aquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
+            Logging.printInfo("Treasure Acquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
         }
 
 
@@ -179,6 +179,7 @@ public class GameStatus implements Serializable {
         // remove player from playerLastMoveMap
         playerLastMoveMap.remove(playerId);
         playerTreasureMap.remove(playerId);
+        playerPositionMap.remove(playerId);
     }
 
     public int getGridSize() {
@@ -200,9 +201,9 @@ public class GameStatus implements Serializable {
 
     // Method for update player list by removing the unexists player List
     public void updatePlayerList(List<String> existPlayerList) {
-        Set<String> playerIdSet = playerPositionMap.keySet();
-        playerIdSet.removeAll(existPlayerList);
-        playerIdSet.parallelStream().forEach(playerId -> playerQuit(playerId));
+        Set<String> wholePlayerSet = new HashSet<>(playerPositionMap.keySet());
+        wholePlayerSet.removeAll(existPlayerList);
+        wholePlayerSet.parallelStream().forEach(playerId -> playerQuit(playerId));
     }
 
     public String getPlayerAt(int j, int i) {
