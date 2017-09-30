@@ -80,14 +80,14 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         this.playerId = playerId;
     }
 
-    public void connectToTracker(ITracker tracker) throws RemoteException, NotBoundException, MalformedURLException {
+    public void connectToTracker(ITracker tracker) throws RemoteException, NotBoundException, MalformedURLException, WrongGameException {
         this.tracker = tracker;
         askTrackerJoinGame();
         askMasterToJoinGame();
         startGameThread();
     }
 
-    private void askMasterToJoinGame() throws RemoteException, MalformedURLException, NotBoundException {
+    private void askMasterToJoinGame() throws RemoteException, MalformedURLException, NotBoundException, WrongGameException {
 
         Logging.printInfo("Current Number of Players " + gameList.size());
 
@@ -100,7 +100,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             IGame master = gameList.get(0);
             master.addNewPlayer(this.playerId);
         }
-
+        GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId());
     }
 
     @Override
@@ -309,11 +309,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         Logging.printInfo("Your input Direction:" + direction.getDirecton() + " for player ID " + playerId);
         //Ask for player move
         IGame master = getMaster();
-        GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId());
+
         try {
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
             this.serverGameStatus = gameStatus;
-
+            GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId());
             Logging.printInfo("Your move is finished :" + direction.getDirecton() + " for player ID " + playerId);
             numOfStep++;
         } catch (Exception ex) {

@@ -16,7 +16,7 @@ public class GameStarter {
      * @throws InterruptedException
      */
     public static void main(String[] args)
-            throws RemoteException, NotBoundException, AlreadyBoundException, InterruptedException, MalformedURLException {
+            throws RemoteException, NotBoundException, AlreadyBoundException, InterruptedException, MalformedURLException, WrongGameException {
         // Get host and port
         String host = args.length > 0 ? args[0] : "localhost";
         String port = args.length > 1 ? args[1] : "1099";
@@ -25,7 +25,7 @@ public class GameStarter {
     }
 
     private static void createAndConnectToTracker(String host, String port, String playerId)
-            throws RemoteException, NotBoundException, InterruptedException, AlreadyBoundException, MalformedURLException {
+            throws RemoteException, NotBoundException, InterruptedException, AlreadyBoundException, MalformedURLException, WrongGameException {
      /*   Registry registry = LocateRegistry.getRegistry(host);
 
         Logging.printInfo("Ready for finding tracker!!");

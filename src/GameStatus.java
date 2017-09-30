@@ -66,7 +66,7 @@ public class GameStatus implements Serializable {
         playerPositionMap.put(playerId, position);
         playerPositionList[position.getX()][position.getY()] = playerId;
 
-        playerLastMoveMap.put(playerId, 0);
+        playerLastMoveMap.put(playerId, -1);
         playerTreasureMap.put(playerId, 0);
     }
 
@@ -111,7 +111,7 @@ public class GameStatus implements Serializable {
 
         boolean isValidPosition = checkValidPosition(newPosition);
         if (!isValidPosition) {
-            Logging.printError("Invalid postion after moving!! Player " + playerId + " new X:" + position.getX() + " new Y:" + position.getY());
+            Logging.printError("Invalid postion after moving!! Player " + playerId + " new X:" + newPosition.getX() + " new Y:" + newPosition.getY());
             newPosition = position;
         }
 
@@ -131,7 +131,7 @@ public class GameStatus implements Serializable {
             randomAssignTreasure();
             this.playerTreasureMap.put(playerId, playerTreasureMap.get(playerId) + numTreasures);
 
-            Logging.printInfo("Treasure Aquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
+            Logging.printInfo("Treasure Acquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
         }
 
 
