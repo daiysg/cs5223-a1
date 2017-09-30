@@ -19,27 +19,32 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     private List<IGame> serverList;
 
+    private Integer port;
     private Integer n;
     private Integer k;
+
+    @Override
+    public Integer getPort() throws RemoteException {
+        return port;
+    }
 
     @Override
     public Integer getN() throws RemoteException {
         return n;
     }
 
-
     @Override
     public Integer getK() throws RemoteException {
         return k;
     }
 
-    public Tracker(Integer n, Integer k) throws RemoteException, NotBoundException {
+    public Tracker(Integer port, Integer n, Integer k) throws RemoteException, NotBoundException {
+        this.port = port;
         this.n = n;
         this.k = k;
 
         this.serverList = new ArrayList<>();
     }
-
 
     @Override
     public List<IGame> getServerList() throws RemoteException {
@@ -54,10 +59,12 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     @Override
     public synchronized List<IGame> joinGame(String playerId) throws RemoteException, MalformedURLException, NotBoundException {
         // TODO: Should we move this logic to Game class and let master call Tracker.setServerList to update Tracker's serverList? Prof wants Tracker to be as light as possible
-        // first join in, the gamer join in is master
+        // The 1st gamer joining in is the Master; the 2nd gamer joining in is the Slave
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
-        String url = new String("rmi://localhost/"+ playerId);
+        String url = new String("rmi://localhost:" + port + "/"+ playerId);
+        Logging.printInfo("lookup url = " + url.toString());
+
         IGame game = (IGame) Naming.lookup(url);
 
         serverList.add(game);
@@ -74,8 +81,10 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     private void printCurrentServerStatus() throws RemoteException {
 
         Logging.printInfo("Current Gamer Status!!!!");
+        int i = 0;
         for (IGame iGame : serverList) {
-            Logging.printInfo("Player id: " + iGame.getId() + " is Master " + iGame.getIsMaster());
+            i++;
+            Logging.printInfo("Player " + i + ". -- Player id: " + iGame.getId() + " is Master " + iGame.getIsMaster());
         }
     }
 

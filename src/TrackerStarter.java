@@ -9,15 +9,20 @@ public class TrackerStarter {
     public static void main(String[] args) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
 
         // Get hostname and port (if given). Use defaults otherwise.
-        int n = args.length > 0 ? Integer.parseInt(args[0]) : 5;
-        int k = args.length > 1 ? Integer.parseInt(args[1]) : 5;
-        ITracker tracker =  new Tracker(n, k);
+        int port = args.length > 0? Integer.parseInt(args[0]) : 1099;
+        int n = args.length > 1 ? Integer.parseInt(args[0]) : 5;
+        int k = args.length > 2 ? Integer.parseInt(args[1]) : 5;
+        ITracker tracker =  new Tracker(port, n, k);
         createTracker(tracker);
         tracker.initGame(n, k);
     }
 
     private static void createTracker(ITracker tracker) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
-        Naming.rebind("tracker", tracker);
+
+        String url = new String("rmi://localhost:" + tracker.getPort() + "/tracker");
+        Logging.printInfo("tracker url = " + url.toString());
+
+        Naming.rebind(url, tracker);
         Logging.printInfo("Tracker is Created");
     }
 }
