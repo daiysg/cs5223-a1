@@ -58,7 +58,7 @@ public class GameStatus implements Serializable {
         }
     }
 
-    public void prepareForNewPlayer(String playerId) {
+    public synchronized void prepareForNewPlayer(String playerId) {
 
         //1. assign random position for new Player
         Position position = getAvailRandomPosition();
