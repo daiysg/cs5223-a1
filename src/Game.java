@@ -5,6 +5,7 @@ import java.rmi.AlreadyBoundException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 
@@ -295,7 +296,7 @@ public class Game implements IGame {
 
 
     //TODO: QUIT GAME
-    private void quitGame(String playerId) {
+    private void quitGame(String playerId) throws WrongGameException, RemoteException {
         if (isMaster) {
             if (gameList.size() == 1) {
                 serverGameStatus.playerQuit(playerId);
@@ -311,24 +312,24 @@ public class Game implements IGame {
                     //update slave game status
                     try {
                         newMaster.slaveBecomeMaster();
-                        newMaster.serverGameStatus.playerQuit(playerId);
+                        newMaster.getServerGameStatus().playerQuit(playerId);
                     } catch (Exception ex) {
 
                     }
                 }
-                newMaster.assgnNewSlave(serverGameStatus);
+                newMaster.assignNewSlave(serverGameStatus);
             }
         }
         else if (isSlave) {
             // slave wants to quit the game
             IGame master=this.getMaster();
-            master.serverGameStatus.playerQuit(playerId);
-            master.assgnNewSlave(serverGameStatus);
+            master.getServerGameStatus().playerQuit(playerId);
+            master.assignNewSlave(serverGameStatus);
         }
         else {
             // a normal player wants to quit the game
             IGame master=this.getMaster();
-            master.serverGameStatus.playerQuit(playerId);
+            master.getServerGameStatus().playerQuit(playerId);
         }
     }
 
@@ -443,6 +444,12 @@ public class Game implements IGame {
     public void setGameStart(Boolean gameStart) {
         this.gameStart = gameStart;
     }
+
+    @Override
+    public GameStatus getServerGameStatus() {
+        return serverGameStatus;
+    }
+
 }
 
 

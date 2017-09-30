@@ -169,7 +169,7 @@ public class GameStatus implements Serializable {
         }
     }
 
-    public void playerQuit(string playerId)
+    public void playerQuit(String playerId)
     {
         // remove player from playerPosition;
         Player player = this.playerHashMap.get(playerId);
