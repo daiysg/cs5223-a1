@@ -1,9 +1,8 @@
+import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
-//TODO: Is this class in use at all?
 public class Utils {
 
     /**
@@ -14,15 +13,11 @@ public class Utils {
      * @param playerId
      * @return
      */
-    public static IGame connectToGame(String host, int port, String playerId) throws RemoteException, NotBoundException, InterruptedException {
-        Registry registry = LocateRegistry.getRegistry(host, port);
-        IGame game = (IGame) registry.lookup(playerId);
-        return game;
-    }
+    public static IGame connectToGame(String host, int port, String playerId) throws RemoteException, NotBoundException, InterruptedException, MalformedURLException {
 
-    public static ITracker connectToGame(String host, int port) throws RemoteException, NotBoundException, InterruptedException {
-        Registry registry = LocateRegistry.getRegistry(host, port);
-        ITracker tracker = (ITracker) registry.lookup("tracker");
-        return tracker;
+        String url = new String("rmi://localhost:" + port + "/" + playerId);
+
+        IGame game = (IGame) Naming.lookup(url);
+        return game;
     }
 }

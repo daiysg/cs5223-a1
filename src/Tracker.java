@@ -1,5 +1,6 @@
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.rmi.AlreadyBoundException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -47,7 +48,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     }
 
     @Override
-    public GameStatus test(GameStatus gameStatus) throws RemoteException{
+    public GameStatus test(GameStatus gameStatus) throws RemoteException {
         return gameStatus;
     }
 
@@ -58,7 +59,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
-        String url = new String("//" + host + ":" +  + port + "/"+ playerId);
+        String url = new String("//" + host + ":" + +port + "/" + playerId);
         Logging.printDebug("player lookup url = " + url.toString());
 
         IGame game = (IGame) Naming.lookup(url);
@@ -77,12 +78,17 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     private void printCurrentServerStatus() throws RemoteException {
 
-        Logging.printInfo("Current Gamer Status!!!!");
-        int i = 0;
-        for (IGame iGame : serverList) {
-            i++;
-            Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() + "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
+        Logging.printInfo("Current Gamer Status!!!! GameList Size = " + serverList.size());
+        try {
+            int i = 0;
+            for (IGame iGame : serverList) {
+                i++;
+                Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() + "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
+
     }
 
     @Override
@@ -92,9 +98,30 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     }
 
     @Override
-    public void setServerList(List<IGame> serverList) throws RemoteException {
+    public synchronized void setServerList(List<IGame> serverList) throws RemoteException {
         this.serverList = serverList;
         printCurrentServerStatus();
+    }
+
+    public static void main(String[] args) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
+
+        // Get port, n, k (if given). Use defaults otherwise.
+        int port = args.length > 0 ? Integer.parseInt(args[0]) : 1099;
+        int n = args.length > 1 ? Integer.parseInt(args[0]) : 5;
+        int k = args.length > 2 ? Integer.parseInt(args[1]) : 5;
+        ITracker tracker = new Tracker(port, n, k);
+        createTracker(tracker);
+        tracker.initGame(n, k);
+    }
+
+    private static void createTracker(ITracker tracker) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
+
+        // Start Tracker at localhost
+        String url = new String("//localhost:" + tracker.getPort() + "/tracker");
+        Logging.printDebug("tracker binding url = " + url.toString());
+
+        Naming.rebind(url, tracker);
+        Logging.printInfo("Tracker is Created");
     }
 }
 
