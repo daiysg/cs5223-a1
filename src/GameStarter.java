@@ -43,19 +43,14 @@ public class GameStarter {
         ITracker tracker = (ITracker) Naming.lookup(url);
         Logging.printInfo("Found tracker!!");
 
-        Game game = new Game(playerId);
-/*
-        String url2 = new String("//localhost:" + port + "/" + playerId);
         Game game = new Game("localhost", Integer.valueOf(port), playerId);
-        String url2 = new String("rmi://localhost:" + port + "/" + playerId);
+        String url2 = new String("//localhost:" + port + "/" + playerId);
         Logging.printDebug("player binding url2 = " + url2.toString());
-        Naming.rebind(url2, game);*/
-
-        Naming.rebind(playerId, game);
+        Naming.rebind(url2, game);
 
         // DEBUG: to print out all names on rmiregistry
         int i = 0;
-        for (String name : Naming.list(playerId))
+        for (String name : Naming.list(url2))
         {
             i++;
             Logging.printDebug("rmiregistry entry " + i + ": " + name.toString());
