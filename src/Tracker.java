@@ -62,7 +62,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         // The 1st gamer joining in is the Master; the 2nd gamer joining in is the Slave
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
-        String url = new String("rmi://localhost:" + port + "/"+ playerId);
+        String url = new String("//localhost:" + port + "/"+ playerId);
         Logging.printDebug("player lookup url = " + url.toString());
 
         IGame game = (IGame) Naming.lookup(url);

@@ -254,7 +254,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             return false;
         }
 
-        String url = new String("rmi://localhost/"+ playerId);
+        String url = new String("//localhost/"+ playerId);
         IGame game = (IGame) Naming.lookup(url);
         gameList.add(game);
 
