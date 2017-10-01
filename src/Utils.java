@@ -15,7 +15,7 @@ public class Utils {
      */
     public static IGame connectToGame(String host, int port, String playerId) throws RemoteException, NotBoundException, InterruptedException, MalformedURLException {
 
-        String url = new String("rmi://localhost:" + port + "/" + playerId);
+        String url = new String("//localhost:" + port + "/" + playerId);
 
         IGame game = (IGame) Naming.lookup(url);
         return game;
