@@ -157,7 +157,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             }
         } catch (Exception ex) {
             Logging.printInfo("Master Failed, slave become master!! PlayerId " + playerId);
-            slaveBecomeMaster();
+            slaveBecomeMaster(master.getId());
         }
 
         Logging.printInfo("Ping to Master: " + playerId);
@@ -180,13 +180,14 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             int i = 1;
             gameList = tracker.getServerList();
             // for loop for first slave with response
-            for (; i < gameList.size(); i++) {
+
+            while ( i < gameList.size()) {
                 IGame iGame = gameList.get(i);
                 try {
                     iGame.ping();
                     //found slave, update slave to be second of all game list
-                    gameStatus = reassignedGameStatusForNewSlave(i);
-                    iGame.updateGameStatus(gameStatus);
+                    gameStatusUpdatePlayerList();
+                    iGame.updateGameStatus(serverGameStatus);
                     iGame.setSlave(true);
                     tracker.setServerList(gameList);
                     return;
@@ -194,6 +195,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     //error for one gamer
                     Logging.printError("One Gamer down" + iGame.getId());
                     removeFailedGamer(iGame);
+                    gameList = tracker.getServerList();
+                    gameList.remove(iGame);
+                    tracker.setServerList(new ArrayList<>(gameList));
                 }
             }
 
@@ -202,42 +206,29 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
             if (gameList.size() > 2) {
                 assignNewSlave(gameStatus);
+            } else {
+                Logging.printInfo("ONLY ONE PLAYER, NO Slave!!");
             }
         }
     }
 
-    //assign game status to new Slave
-    private synchronized GameStatus reassignedGameStatusForNewSlave(int i) throws RemoteException {
-        List stillAvailGameList = gameList.subList(i, gameList.size());
-        gameList = new ArrayList<>();
-        gameList.add(this);
-        gameList.addAll(stillAvailGameList);
-
-        //update PlayerHashMap
-        gameStatusUpdatePlayerList();
-
-        //update Tracker Player List
-        tracker.setServerList(new ArrayList<>(gameList));
-        return serverGameStatus;
-    }
-
     //make slave become master
     @Override
-    public synchronized void slaveBecomeMaster() throws RemoteException {
+    public synchronized void slaveBecomeMaster(String originalMasterPlayerId) throws RemoteException {
         if (isSlave) {
             isSlave = false;
             isMaster = true;
 
             gameList = tracker.getServerList();
-            gameList = gameList.subList(1, gameList.size());
-            serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> {
-                try {
-                    return gamer.getId();
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                    return null;
+            try {
+                if (originalMasterPlayerId != null) {
+                    IGame originalMaster = Utils.connectToGame(host, port, originalMasterPlayerId);
+                    gameList.remove(originalMaster);
                 }
-            }).filter(id -> id != null).collect(Collectors.toList()));
+            } catch (Exception ex) {
+                Logging.printInfo("Original Master is already removed, can ignore this exception");
+            }
+            gameStatusUpdatePlayerList();
             tracker.setServerList(new ArrayList<>(gameList));
             try {
                 assignNewSlave(serverGameStatus);
@@ -295,7 +286,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     public synchronized void startGameThread() throws RemoteException {
 
-        Logging.printInfo("Start game Thread for player" + playerId);
+        Logging.printInfo("Start game Thread for player " + playerId);
 
         this.gameInputThread = new Thread() {
             public void run() {
@@ -341,6 +332,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                         //TODO: Slave to ping Master
                     } catch (Exception e) {
                         //TODO: Slave becomes new Master
+                        e.printStackTrace();
                     }
                 }
             }
@@ -370,6 +362,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 Logging.printInfo("Waiting for your input for Player :" + playerId);
 
             } catch (InterruptedException e) {
+                e.printStackTrace();
                 return;
             }
         } while ("".equals(input));
@@ -378,10 +371,22 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         //Player sends move request to Master
         Logging.printInfo("Your input Direction:" + direction.getDirecton() + " for player ID " + playerId);
-        //Ask for player move
-        IGame master = getMaster();
+        IGame master = null;
+        try {
+            master = getMaster();
+        } catch (Exception ex) {
+            gameList = tracker.getServerList();
+            try  {
+                // original master down, try to get new master
+                master = getMaster();
+            } catch (Exception e) {
+                master = null; // on purpose, for this case, count on slave
+            }
+        }
 
         try {
+            //Ask for player move
+
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
             serverGameStatus = gameStatus;
 
@@ -401,7 +406,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             IGame newMaster = this.getSlave();
             if (newMaster != null) {
                 //update slave game status
-                newMaster.slaveBecomeMaster();
+                if (master == null) {
+                    newMaster.slaveBecomeMaster(null);
+                } else {
+                    newMaster.slaveBecomeMaster(master.getId());
+                }
                 GameStatus gameStatus = newMaster.move(this.playerId, direction, numOfStep);
                 this.serverGameStatus = gameStatus;
                 numOfStep++;
@@ -456,7 +465,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             if (newMaster != null) {
                 //update slave game status
                 try {
-                    newMaster.slaveBecomeMaster();
+                    newMaster.slaveBecomeMaster(this.playerId);
                     newMaster.getServerGameStatus().playerQuit(playerId);
                 } catch (Exception ex) {
 

@@ -47,11 +47,11 @@ public interface IGame extends Remote {
      * Slave Become Master
      * @throws RemoteException
      */
-    void slaveBecomeMaster() throws RemoteException;
+    void slaveBecomeMaster(String originalMasterPlayerId) throws RemoteException;
 
     /**
      * Tracker call master for adding new player
-     * @param game
+     * @param playerId
      * @throws RemoteException
      */
     boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException;
