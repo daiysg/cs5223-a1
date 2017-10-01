@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class Tracker extends UnicastRemoteObject implements ITracker, Serializable {
@@ -44,6 +45,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     @Override
     public List<IGame> getServerList() throws RemoteException {
+        serverList = validateGameList(serverList);
         return serverList;
     }
 
@@ -98,9 +100,23 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     }
 
     @Override
-    public synchronized void setServerList(List<IGame> serverList) throws RemoteException {
-        this.serverList = serverList;
+    public synchronized List<IGame> setServerList(List<IGame> inputServerList) throws RemoteException {
+        this.serverList = validateGameList(inputServerList);
         printCurrentServerStatus();
+        return serverList;
+    }
+
+
+    private List<IGame> validateGameList(List<IGame> serverList) throws RemoteException {
+
+        return new ArrayList<>(serverList.parallelStream().filter(game -> {
+            try {
+                game.ping();
+                return true;
+            } catch (Exception ex) {
+                return false;
+            }
+        }).collect(Collectors.toList()));
     }
 
     public static void main(String[] args) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {

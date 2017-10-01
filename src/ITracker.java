@@ -36,5 +36,5 @@ public interface ITracker extends Remote {
      *
      * @param serverList
      */
-    void setServerList(List<IGame> serverList) throws RemoteException;
+    List<IGame> setServerList(List<IGame> serverList) throws RemoteException;
 }

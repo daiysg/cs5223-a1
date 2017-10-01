@@ -193,7 +193,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             gameList = tracker.getServerList();
             // for loop for first slave with response
 
-            while ( i < gameList.size()) {
+            while (i < gameList.size()) {
                 IGame iGame = gameList.get(i);
                 try {
                     iGame.ping();
@@ -201,7 +201,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     gameStatusUpdatePlayerList();
                     iGame.updateGameStatus(serverGameStatus);
                     iGame.setSlave(true);
-                    tracker.setServerList(gameList);
+                    gameList = tracker.setServerList(gameList);
                     return;
                 } catch (RemoteException e) {
                     //error for one gamer
@@ -209,7 +209,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     removeFailedGamer(iGame);
                     gameList = tracker.getServerList();
                     gameList.remove(iGame);
-                    tracker.setServerList(new ArrayList<>(gameList));
+                    gameList = tracker.setServerList(new ArrayList<>(gameList));
                 }
             }
 
@@ -241,7 +241,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 Logging.printInfo("Original Master is already removed, can ignore this exception");
             }
             gameStatusUpdatePlayerList();
-            tracker.setServerList(new ArrayList<>(gameList));
+            gameList = tracker.setServerList(new ArrayList<>(gameList));
             try {
                 assignNewSlave(serverGameStatus);
             } catch (Exception e) {
@@ -387,7 +387,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             master = getMaster();
         } catch (Exception ex) {
             gameList = tracker.getServerList();
-            try  {
+            try {
                 // original master down, try to get new master
                 master = getMaster();
             } catch (Exception e) {
@@ -490,7 +490,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             IGame master = this.getMaster();
             master.getServerGameStatus().playerQuit(playerId);
             this.gameList.remove(game);
-            tracker.setServerList(new ArrayList<>(gameList));
+            gameList = tracker.setServerList(new ArrayList<>(gameList));
             master.assignNewSlave(serverGameStatus);
 
         } else {
@@ -498,7 +498,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             IGame master = this.getMaster();
             master.getServerGameStatus().playerQuit(playerId);
             this.gameList.remove(game);
-            tracker.setServerList(new ArrayList<>(gameList));
+            gameList = tracker.setServerList(new ArrayList<>(gameList));
         }
 
         game.quit();
@@ -537,7 +537,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         if (gameList.size() != updatedGameList.size()) {
             gameList = updatedGameList;
-            tracker.setServerList(new ArrayList<>(gameList));
+            gameList = tracker.setServerList(new ArrayList<>(gameList));
         }
     }
 
@@ -709,8 +709,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         // DEBUG: to print out all names on rmiregistry
         int i = 0;
-        for (String name : Naming.list(url2))
-        {
+        for (String name : Naming.list(url2)) {
             i++;
             Logging.printDebug("rmiregistry entry " + i + ": " + name.toString());
         }
