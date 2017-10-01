@@ -8,6 +8,8 @@ public class Logging {
         System.out.println("ERROR:: " + message);
     }
 
-    public static void printDebug(String message) { System.out.println ("DEGUB:: " + message);}
+    public static void printDebug(String message) {
+        System.out.println ("DEGUB:: " + message);
+    }
 
 }

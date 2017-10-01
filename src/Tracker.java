@@ -61,7 +61,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
-        String url = new String("//" + host + ":" + +port + "/" + playerId);
+        String url = new String("//" + host + ":" + port + "/" + playerId);
         Logging.printDebug("player lookup url = " + url.toString());
 
         IGame game = (IGame) Naming.lookup(url);
@@ -155,7 +155,24 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         String url = new String("//localhost:" + tracker.getPort() + "/tracker");
         Logging.printDebug("tracker binding url = " + url.toString());
 
-        Naming.rebind(url, tracker);
+//        Naming.rebind(url, tracker);
+
+        //try and retry for 3 times
+        try {
+            Naming.rebind(url, tracker);
+        } catch (Exception e) {
+            try {
+                Naming.rebind(url, tracker);
+            } catch (Exception e2) {
+                try {
+                    Naming.rebind(url, tracker);
+                } catch (Exception e3) {
+                    e3.printStackTrace();
+                    return;
+                }
+            }
+        }
+
         Logging.printInfo("Tracker is Created");
     }
 }
