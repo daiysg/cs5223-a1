@@ -111,7 +111,24 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     @Override
     public synchronized void askTrackerJoinGame() throws RemoteException, NotBoundException, MalformedURLException {
         initGameStatus();
-        this.gameList = tracker.joinGame(host, port, playerId);
+        //try and retry for 3 times
+        try {
+            this.gameList = tracker.joinGame(host, port, playerId);
+        } catch (Exception ex) {
+            try {
+                this.gameList = tracker.joinGame(host, port, playerId);
+            } catch (Exception e) {
+                try {
+                    this.gameList = tracker.joinGame(host, port, playerId);
+                } catch (Exception e2) {
+                    e2.printStackTrace();
+                    return;
+                }
+
+            }
+
+        }
+
 
         if (gameList.size() == 1) {
             isMaster = true;
