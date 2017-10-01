@@ -200,7 +200,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
      * Master to ping all players to check whether they are still alive
      */
 //    @Override
-    private synchronized void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException {
+    private void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException {
 
         if (!gameStart || serverGameStatus == null) {
             Thread.sleep(100);
