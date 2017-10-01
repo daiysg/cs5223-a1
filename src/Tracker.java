@@ -73,6 +73,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         } else if (serverList.size() == 2) {
             game.setSlave(true);
         }
+        this.serverList = validateGameList(serverList);
 
         printCurrentServerStatus();
         return serverList;
@@ -80,15 +81,33 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     private void printCurrentServerStatus() throws RemoteException {
 
+        boolean hasMaster = false;
+        boolean hasSlave = false;
         Logging.printInfo("Current Gamer Status!!!! GameList Size = " + serverList.size());
         try {
             int i = 0;
             for (IGame iGame : serverList) {
+                if (iGame.getIsMaster()) {
+                    hasMaster = true;
+                }
+                if (iGame.getIsSlave()) {
+                    hasSlave = true;
+                }
                 i++;
                 Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() + "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
             }
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+
+
+        //TODO should be removed if thread works fine.
+        if (hasMaster == false && serverList.size() > 0) {
+            serverList.get(0).setMaster(true);
+        }
+
+        if (hasSlave == false && serverList.size() > 1) {
+            serverList.get(1).setSlave(true);
         }
 
     }
