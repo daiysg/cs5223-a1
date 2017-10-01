@@ -562,16 +562,21 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
 
     private IGame getSlave() throws WrongGameException, RemoteException {
-        if (isSlave) {
-            return this;
-        } else {
-            //second is slave
-            for (int i = 0; i < gameList.size(); i++) {
-                if (gameList.get(i).getIsSlave()) {
-                    return gameList.get(i);
+        try {
+            if (isSlave) {
+                return this;
+            } else {
+                //second is slave
+                for (int i = 0; i < gameList.size(); i++) {
+                    if (gameList.get(i).getIsSlave()) {
+                        return gameList.get(i);
+                    }
                 }
+                return null;
             }
-            return null;
+        } catch (Exception ex) {
+            gameList = tracker.getServerList();
+            return getSlave();
         }
     }
 
@@ -617,17 +622,30 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     @Override
     public void quit() throws NoSuchObjectException, RemoteException {
-        UnicastRemoteObject.unexportObject(this, true);
+        try {
+            UnicastRemoteObject.unexportObject(this, true);
 
-        Logging.printInfo("Player QUIT, player ID: " + playerId);
-        if (this.gameInputThread != null) {
-            this.gameInputThread.interrupt();
-        }
-        if (this.pingTimer != null) {
-            this.pingTimer.cancel();
+            Logging.printInfo("Player QUIT, player ID: " + playerId);
+            if (this.gameInputThread != null) {
+                this.gameInputThread.interrupt();
+            }
+            if (this.pingTimer != null) {
+                this.pingTimer.cancel();
+            }
+
+            if (this.masterPingThread != null) {
+                this.masterPingThread.interrupt();
+            }
+
+            if (this.slavePingThread != null) {
+                this.slavePingThread.interrupt();
+            }
+
+            falseQuit = true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
         }
 
-        falseQuit = true;
     }
 }
 
