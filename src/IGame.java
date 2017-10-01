@@ -1,6 +1,7 @@
 
 
 import java.net.MalformedURLException;
+import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -76,7 +77,7 @@ public interface IGame extends Remote {
      *  need handle exit game
      */
 
-    GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException, WrongGameException;
+    GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException, WrongGameException, MalformedURLException, NotBoundException;
 
     void setSlave(Boolean slave) throws RemoteException;
 
@@ -91,4 +92,6 @@ public interface IGame extends Remote {
     void setGameStart(Boolean gameStart) throws RemoteException;
 
     GameStatus getServerGameStatus() throws RemoteException;
+
+    void quit() throws NoSuchObjectException, RemoteException;
 }

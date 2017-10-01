@@ -84,7 +84,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         int i = 0;
         for (IGame iGame : serverList) {
             i++;
-            Logging.printInfo("Player " + i + ". -- Player id: " + iGame.getId() + " is Master " + iGame.getIsMaster());
+            Logging.printInfo("Player " + i + ". -- Player id: " + iGame.getId() + " is Master " + iGame.getIsMaster() + " is Slave " + iGame.getIsSlave());
         }
     }
 
@@ -98,6 +98,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     @Override
     public void setServerList(List<IGame> serverList) throws RemoteException {
         this.serverList = serverList;
+        printCurrentServerStatus();
     }
 }
 
