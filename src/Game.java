@@ -27,7 +27,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     /**
      * An ordered list of all gamer in the game
-     * Please note that MASTER_SERVER_INDEX is Master and SLAVE_SERVER_INDEX is Slave
+     * Please note that index 0 is Master and index 1 is Slave
      */
     private List<IGame> gameList;
 
@@ -86,8 +86,10 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         askTrackerJoinGame();
         askMasterToJoinGame();
         startGameThread();
-
-        startSlavePingThread();
+        if (isSlave)
+        {
+            startSlavePingThread();
+        }
     }
 
     private void askMasterToJoinGame() throws RemoteException, MalformedURLException, NotBoundException, WrongGameException, InterruptedException {
@@ -147,8 +149,13 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     /**
      * Master to ping all players to check whether they are still alive
      */
-    @Override
-    public void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException {
+//    @Override
+    private synchronized void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException {
+
+        if (!gameStart || serverGameStatus == null) {
+            Thread.sleep(100);
+            return;
+        }
 
         // Only Master can ping all players
         if (!isMaster) {
@@ -157,30 +164,49 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
         List<IGame> updatedGameList = new ArrayList<>();
+        List<String> gameIdList = new ArrayList<>();
 
-        IGame slave = gameList.get(1);
-        try {
-            Logging.printDebug("Ping from Master to Slave: " + slave.getId());
-            slave.ping();
-            Thread.sleep(100); //TODO: to calculate the interval
-        } catch (RemoteException ex) {
-            removeFailedGamer(slave);
-            assignNewSlave(serverGameStatus);
+        if (gameList.size() >= 1){
+            IGame master = gameList.get(0);
+            updatedGameList.add(master);
         }
 
-        for (IGame iGame : gameList.subList(2, gameList.size())) {
+        if (gameList.size() >= 2){
+            IGame slave = gameList.get(1);
+            String slaveId = slave.getId();
             try {
-                Logging.printDebug("Ping from Master to Player: " + iGame.getId());
-                iGame.ping();
-                updatedGameList.add(iGame);
-                Thread.sleep(100); //TODO: to calculate the interval
-            } catch (RemoteException e) {
-                Logging.printInfo("Player " + iGame.getId() + " is down.");
-                removeFailedGamer(iGame);
+                Logging.printDebug("Ping from Master to Slave: " + slave.getId());
+                slave.ping();
+                updatedGameList.add(slave);
+                Thread.sleep(500); //TODO: to calculate the interval
+            } catch (Exception ex) {
+                Logging.printDebug("Ping from Master to Slave failed! slaveId = " + slaveId);
+                removeFailedGamer(slaveId);
+                this.gameList.remove(slave);
+                tracker.setServerList(new ArrayList<>(gameList));
+                assignNewSlave(serverGameStatus);
+                Thread.sleep(1000); //TODO: wait for new Slave to get ready
             }
         }
 
+        if (gameList.size() > 2){
+            for (IGame iGame : gameList.subList(2, gameList.size())) {
+                try {
+                    Logging.printDebug("Ping from Master to Player: " + iGame.getId());
+                    iGame.ping();
+                    updatedGameList.add(iGame);
+                    Thread.sleep(500); //TODO: to calculate the interval
+                } catch (RemoteException e) {
+                    Logging.printDebug("Ping from Master to Player failed! playerId = " + iGame.getId());
+                    Logging.printInfo("Player " + iGame.getId() + " is down.");
+//                    removeFailedGamer(iGame);
+                }
+            }
+        }
+
+
         if (gameList.size() != updatedGameList.size()) {
+            Logging.printDebug("ZH: gameList.size = " + gameList.size() + "updatedGameList.size() = " + updatedGameList.size());
             gameList = updatedGameList;
             tracker.setServerList(new ArrayList<>(gameList));
         }
@@ -233,6 +259,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
             while ( i < gameList.size()) {
                 IGame iGame = gameList.get(i);
+                String iGameId = iGame.getId();
                 try {
                     iGame.ping();
 
@@ -250,8 +277,8 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     return;
                 } catch (RemoteException e) {
                     //error for one gamer
-                    Logging.printError("One player is down, playerId = " + iGame.getId());
-                    removeFailedGamer(iGame);
+                    Logging.printError("One player is down, playerId = " + iGameId);
+                    removeFailedGamer(iGameId);
                     gameList = tracker.getServerList();
                     gameList.remove(iGame);
                     tracker.setServerList(new ArrayList<>(gameList));
@@ -397,19 +424,19 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
 
-        IGame master = gameList.get(0);
+//        IGame master = gameList.get(0);
         this.masterPingThread = new Thread() {
             public void run() {
-                while (true) {
+                while (!falseQuit) {
                     try {
-                        master.pingAllPlayers();
+                        pingAllPlayers();
                     }catch (Exception e) {
-
+                        e.printStackTrace();
                     }
                 }
             }
         };
-        this.masterPingThread.interrupt();//TODO
+
         this.masterPingThread.start();
     }
 
@@ -443,7 +470,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 }
             }
         };
-        this.slavePingThread.start();
+//        this.slavePingThread.start();
     }
 
     private void movePlayerInput() throws InterruptedException, IOException, WrongGameException, NotBoundException {
@@ -613,11 +640,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     /**
      * From master to update player and gamer status
      *
-     * @param iGame
+     * @param iGameId
      */
-    private synchronized void removeFailedGamer(IGame iGame) throws RemoteException {
+    private synchronized void removeFailedGamer(String iGameId) throws RemoteException {
         //remove Failed Player
-        serverGameStatus.playerQuit(iGame.getId());
+        serverGameStatus.playerQuit(iGameId);
         return;
     }
 

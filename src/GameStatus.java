@@ -27,7 +27,7 @@ public class GameStatus implements Serializable {
     /**
      * Treasure Position
      */
-    public int[][] treasurePostion;
+    public int[][] treasurePosition;
 
     /**
      * Number of moves processed for players
@@ -47,7 +47,7 @@ public class GameStatus implements Serializable {
         this.playerPositionList = new String[gridSize][gridSize];
         this.playerLastMoveMap = new HashMap<>();
         this.playerPositionMap = new HashMap<>();
-        this.treasurePostion = new int[gridSize][gridSize];
+        this.treasurePosition = new int[gridSize][gridSize];
 
         //assign treasure
         for (int i = 0; i < totalTreasures; i++) {
@@ -87,7 +87,7 @@ public class GameStatus implements Serializable {
     }
 
     private boolean isTreasureVacantCell(int x, int y) {
-        return this.treasurePostion[x][y] != 1;
+        return this.treasurePosition[x][y] != 1;
     }
 
     public void movePlayer(String playerId, Direction direction, int numOfStep) {
@@ -99,7 +99,7 @@ public class GameStatus implements Serializable {
 
         //check if this move is been executed
         if (playerLastMoveMap.get(playerId) >= numOfStep) {
-            Logging.printError("THis move is exectued already!!!");
+            Logging.printError("THis move is executed already!!!");
             return;
         }
 
@@ -107,7 +107,7 @@ public class GameStatus implements Serializable {
 
         boolean isValidPosition = checkValidPosition(newPosition);
         if (!isValidPosition) {
-            Logging.printError("Invalid postion after moving!! Player " + playerId + " new X:" + newPosition.getX() + " new Y:" + newPosition.getY());
+            Logging.printError("Invalid position after moving!! Player " + playerId + " new X:" + newPosition.getX() + " new Y:" + newPosition.getY());
             newPosition = position;
         }
 
@@ -120,10 +120,10 @@ public class GameStatus implements Serializable {
         playerLastMoveMap.put(playerId, numOfStep);
 
         // Collect treasures at new position, if any.
-        int numTreasures = this.treasurePostion[newPosition.getX()][newPosition.getY()];
+        int numTreasures = this.treasurePosition[newPosition.getX()][newPosition.getY()];
 
         if (numTreasures > 0) {
-            this.treasurePostion[newPosition.getX()][newPosition.getY()] = 0;
+            this.treasurePosition[newPosition.getX()][newPosition.getY()] = 0;
             randomAssignTreasure();
             this.playerTreasureMap.put(playerId, playerTreasureMap.get(playerId) + numTreasures);
 
@@ -137,7 +137,7 @@ public class GameStatus implements Serializable {
         while (!isTreasureVacantCell(position.getX(), position.getY())){
             position = getAvailRandomPosition();
         }
-        treasurePostion[position.getX()][position.getY()] = 1;
+        treasurePosition[position.getX()][position.getY()] = 1;
     }
 
     private boolean checkValidPosition(Position newPosition) {
@@ -204,6 +204,6 @@ public class GameStatus implements Serializable {
     }
 
     public int getTreasureAt(int j, int i) {
-        return treasurePostion[j][i];
+        return treasurePosition[j][i];
     }
 }

@@ -27,7 +27,7 @@ public interface IGame extends Remote {
     /**
      * Master to ping all players to check whether they are still alive
      */
-    void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException;
+//    void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException;
 
     /**
      * Slave to check whether Master is alive
