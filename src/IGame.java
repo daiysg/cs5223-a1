@@ -24,11 +24,15 @@ public interface IGame extends Remote {
      */
     void ping() throws RemoteException;
 
+    /**
+     * Master to ping all players to check whether they are still alive
+     */
+    void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException;
 
     /**
      * Slave to check whether Master is alive
      */
-    void pingMaster() throws RemoteException, WrongGameException;
+    void pingMaster() throws RemoteException, WrongGameException, InterruptedException;
 
     /**
      *
@@ -94,4 +98,5 @@ public interface IGame extends Remote {
     GameStatus getServerGameStatus() throws RemoteException;
 
     void quit() throws NoSuchObjectException, RemoteException;
+
 }
