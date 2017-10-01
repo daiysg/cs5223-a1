@@ -20,7 +20,11 @@ public class GameStarter {
         // Get host and port
         String host = args.length > 0 ? args[0] : "localhost";
         String port = args.length > 1 ? args[1] : "1099";
-        String playerId = args.length > 2 ? args[2] : "zz" + (new Random().nextInt() % 100);
+
+        Random r = new Random();
+        String s1 = String.valueOf((char) (r.nextInt(26) + 'a'));
+        String s2 = String.valueOf((char) (r.nextInt(26) + 'a'));
+        String playerId = args.length > 2 ? args[2] : s1 + s2;
         createAndConnectToTracker(host, port, playerId);
     }
 
@@ -40,7 +44,7 @@ public class GameStarter {
         Logging.printInfo("Found tracker!!");
 
 
-        Game game = new Game(playerId);
+        Game game = new Game("localhost", Integer.valueOf(port), playerId);
         String url2 = new String("rmi://localhost:" + port + "/" + playerId);
         Logging.printDebug("player binding url2 = " + url2.toString());
         Naming.rebind(url2, game);
@@ -48,8 +52,7 @@ public class GameStarter {
 
         // DEBUG: to print out all names on rmiregistry
         int i = 0;
-        for (String name : Naming.list(url2))
-        {
+        for (String name : Naming.list(url2)) {
             i++;
             Logging.printDebug("rmiregistry entry " + i + ": " + name.toString());
         }

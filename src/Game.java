@@ -74,10 +74,15 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     private Boolean falseQuit = false;
 
-    public Game(String playerId) throws RemoteException, AlreadyBoundException, NotBoundException {
+    private String host;
+    private int port;
+
+    public Game(String host, int port, String playerId) throws RemoteException, AlreadyBoundException, NotBoundException {
         gameStart = false;
         gameList = new ArrayList<>();
         serverGameStatus = null;
+        this.host = host;
+        this.port = port;
         this.playerId = playerId;
     }
 
@@ -173,6 +178,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         //only Master can assign new Slave
         if (isMaster) {
             int i = 1;
+            gameList = tracker.getServerList();
             // for loop for first slave with response
             for (; i < gameList.size(); i++) {
                 IGame iGame = gameList.get(i);
@@ -182,6 +188,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     gameStatus = reassignedGameStatusForNewSlave(i);
                     iGame.updateGameStatus(gameStatus);
                     iGame.setSlave(true);
+                    tracker.setServerList(gameList);
                     return;
                 } catch (RemoteException e) {
                     //error for one gamer
@@ -221,6 +228,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             isSlave = false;
             isMaster = true;
 
+            gameList = tracker.getServerList();
             gameList = gameList.subList(1, gameList.size());
             serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> {
                 try {
@@ -249,7 +257,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             return false;
         }
 
-        String url = new String("rmi://localhost/" + playerId);
+        String url = new String("rmi://localhost:" + port + "/" + playerId);
         IGame game = (IGame) Naming.lookup(url);
         gameList.add(game);
 
@@ -439,7 +447,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     private void quitGame(String playerId) throws WrongGameException, RemoteException, MalformedURLException, NotBoundException {
 
 
-        String url = new String("rmi://localhost/" + playerId);
+        String url = new String("rmi://localhost:" + port + "/" + playerId);
         IGame game = (IGame) Naming.lookup(url);
 
         if (game.getIsMaster()) {
