@@ -269,7 +269,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
     }
 
-<<<<<<< HEAD
     //assign game status to new Slave
     private synchronized GameStatus reassignedGameStatusForNewSlave(int i) throws RemoteException {
         List stillAvailGameList = gameList.subList(i, gameList.size());
