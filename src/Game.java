@@ -80,14 +80,14 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         this.playerId = playerId;
     }
 
-    public void connectToTracker(ITracker tracker) throws RemoteException, NotBoundException, MalformedURLException, WrongGameException {
+    public void connectToTracker(ITracker tracker) throws RemoteException, NotBoundException, MalformedURLException, WrongGameException, InterruptedException {
         this.tracker = tracker;
         askTrackerJoinGame();
         askMasterToJoinGame();
         startGameThread();
     }
 
-    private void askMasterToJoinGame() throws RemoteException, MalformedURLException, NotBoundException, WrongGameException {
+    private void askMasterToJoinGame() throws RemoteException, MalformedURLException, NotBoundException, WrongGameException, InterruptedException {
 
         Logging.printInfo("Current Number of Players " + gameList.size());
 
@@ -234,7 +234,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     }
 
     @Override
-    public synchronized boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException {
+    public synchronized boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException, InterruptedException {
 
         //if the player is not master, it means tracker call wrong gamer
         if (!isMaster) {
@@ -242,8 +242,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             return false;
         }
 
-        String url = new String("//" + host + ":" + port + "/" + playerId);
-        IGame game = (IGame) Naming.lookup(url);
+        IGame game = Utils.connectToGame(host, port, playerId);
         gameList.add(game);
 
         //gameList = 1 means need to init game status for master
@@ -419,7 +418,12 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
         if (direction == Direction.QUIT) {
-            quitGame(playerId);
+            try {
+                quitGame(playerId);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+
 
             return serverGameStatus;
         }
@@ -447,11 +451,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
 
     //TODO: QUIT GAME
-    private void quitGame(String playerId) throws WrongGameException, RemoteException, MalformedURLException, NotBoundException {
+    private void quitGame(String playerId) throws WrongGameException, RemoteException, MalformedURLException, NotBoundException, InterruptedException {
 
-
-        String url = new String("//" + host + ":" + port + "/" + playerId);
-        IGame game = (IGame) Naming.lookup(url);
+        IGame game = Utils.connectToGame(host, port, playerId);
 
         if (game.getIsMaster()) {
             // when master wants to quit the game, assign slave as master

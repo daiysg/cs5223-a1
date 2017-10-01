@@ -2,10 +2,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
 
-//TODO: Is this class in use at all?
 public class Utils {
 
     /**
@@ -22,11 +19,5 @@ public class Utils {
 
         IGame game = (IGame) Naming.lookup(url);
         return game;
-    }
-
-    public static ITracker connectToGame(String host, int port) throws RemoteException, NotBoundException, InterruptedException {
-        Registry registry = LocateRegistry.getRegistry(host, port);
-        ITracker tracker = (ITracker) registry.lookup("tracker");
-        return tracker;
     }
 }

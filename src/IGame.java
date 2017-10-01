@@ -1,3 +1,5 @@
+
+
 import java.net.MalformedURLException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
@@ -52,7 +54,7 @@ public interface IGame extends Remote {
      * @param playerId
      * @throws RemoteException
      */
-    boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException;
+    boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException, InterruptedException;
 
     /**
      * Master call player game start
