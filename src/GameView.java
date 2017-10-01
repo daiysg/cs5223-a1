@@ -1,6 +1,7 @@
 /**
  * Utility class to present the game to the user.
  */
+
 import java.util.*;
 
 public class GameView {
@@ -8,7 +9,7 @@ public class GameView {
      * Prints a summary of the game so far.
      *
      * @param gameStatus
-     * @param playerId The player viewing the summary.
+     * @param playerId   The player viewing the summary.
      */
     public static void printGameSummary(GameStatus gameStatus, String playerId, String masterId, String slaveId) {
 //        System.out.println("Status for player Id : " + playerId + " Master ID " + masterId );
@@ -19,8 +20,8 @@ public class GameView {
         System.out.println();
         GameView.printPlayerInformation(gameStatus, masterId, slaveId);
     }
-    static String printRow(GameStatus gameStatus,int gridRow)
-    {
+
+    static String printRow(GameStatus gameStatus, int gridRow) {
         StringBuilder sb_1 = new StringBuilder();
         StringBuilder sb_2_4 = new StringBuilder();
         StringBuilder sb_3 = new StringBuilder();
@@ -35,8 +36,8 @@ public class GameView {
             sb_1.append("+--------");
             sb_2_4.append("+        ");
 
-            if (gameStatus.getPlayerAt(gridRow, gridCol) != null ) {
-                sb_3.append("+   "+ gameStatus.getPlayerAt(gridRow, gridCol) + "   ");
+            if (gameStatus.getPlayerAt(gridRow, gridCol) != null) {
+                sb_3.append("+   " + gameStatus.getPlayerAt(gridRow, gridCol) + "   ");
             } else if (gameStatus.getTreasureAt(gridRow, gridCol) == 1) {
                 sb_3.append("+   *    ");
             } else {
@@ -52,8 +53,7 @@ public class GameView {
 
     static void getGraphicalMaze(GameStatus gameStatus) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < gameStatus.getGridSize(); i++)
-        {
+        for (int i = 0; i < gameStatus.getGridSize(); i++) {
             sb.append(printRow(gameStatus, i));
         }
 
@@ -69,9 +69,9 @@ public class GameView {
         int prefix = (space - score.length()) / 2;
         int postfix = space - score.length() - prefix;
         String result = "";
-        result += (prefix == 0 ? "" : String.format("%"+prefix+"s", " "));
+        result += (prefix == 0 ? "" : String.format("%" + prefix + "s", " "));
         result += score;
-        result += (postfix == 0 ? "" : String.format("%"+postfix+"s", " "));
+        result += (postfix == 0 ? "" : String.format("%" + postfix + "s", " "));
         return result;
     }
 

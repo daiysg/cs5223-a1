@@ -159,13 +159,13 @@ public class GameStatus implements Serializable {
     private Position getNewPosition(Position position, Direction direction) {
         switch (direction) {
             case N:
-                return new Position(position.getX(), position.getY() + 1);
-            case E:
-                return new Position(position.getX() + 1, position.getY());
-            case S:
-                return new Position(position.getX(), position.getY() - 1);
-            case W:
                 return new Position(position.getX() - 1, position.getY());
+            case E:
+                return new Position(position.getX(), position.getY() + 1);
+            case S:
+                return new Position(position.getX() + 1, position.getY());
+            case W:
+                return new Position(position.getX(), position.getY() - 1);
             default:
                 return new Position(position.getX(), position.getY());
         }
