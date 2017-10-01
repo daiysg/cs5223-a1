@@ -43,8 +43,8 @@ public class GameStarter {
         ITracker tracker = (ITracker) Naming.lookup(url);
         Logging.printInfo("Found tracker!!");
 
-        Game game = new Game("localhost", Integer.valueOf(port), playerId);
-        String url2 = new String("//localhost:" + port + "/" + playerId);
+        Game game = new Game(host, Integer.valueOf(port), playerId);
+        String url2 = new String("//" + host + ":" + port + "/" + playerId);
         Logging.printDebug("player binding url2 = " + url2.toString());
         Naming.rebind(url2, game);
 

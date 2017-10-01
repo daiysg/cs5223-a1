@@ -57,12 +57,12 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     }
 
     @Override
-    public synchronized List<IGame> joinGame(String playerId) throws RemoteException, MalformedURLException, NotBoundException {
+    public synchronized List<IGame> joinGame(String host, int port, String playerId) throws RemoteException, MalformedURLException, NotBoundException {
         // TODO: Should we move this logic to Game class and let master call Tracker.setServerList to update Tracker's serverList? Prof wants Tracker to be as light as possible
         // The 1st gamer joining in is the Master; the 2nd gamer joining in is the Slave
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
-        String url = new String("//localhost:" + port + "/"+ playerId);
+        String url = new String("//" + host + ":" +  + port + "/"+ playerId);
         Logging.printDebug("player lookup url = " + url.toString());
 
         IGame game = (IGame) Naming.lookup(url);

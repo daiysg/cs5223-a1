@@ -22,11 +22,11 @@ public interface ITracker extends Remote {
     /**
      * Player call tracker to join game
      *
-     * @param game
+     * @param host, port, playerId
      * @return
      * @throws RemoteException
      */
-    //List<IGame> joinGame(IGame game) throws RemoteException;
+    List<IGame> joinGame(String host, int port, String playerId) throws RemoteException, MalformedURLException, NotBoundException;
 
     /**
      *
@@ -40,6 +40,4 @@ public interface ITracker extends Remote {
      * @param serverList
      */
     void setServerList(List<IGame> serverList) throws RemoteException;
-
-    List<IGame> joinGame(String playerId) throws RemoteException, MalformedURLException, NotBoundException;
 }
