@@ -1,7 +1,3 @@
-/**
- * Refer to Game
- */
-
 import java.io.Serializable;
 import java.util.*;
 
@@ -10,7 +6,7 @@ import java.util.*;
  */
 public class GameStatus implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4L;
 
     //grid size
     private int gridSize;
@@ -134,9 +130,6 @@ public class GameStatus implements Serializable {
             Logging.printInfo("Treasure Acquired!!!! PlayerID:" + playerId + " at X:" + newPosition.getX() + " Y: " + newPosition.getY());
         }
 
-
-
-
     }
 
     private void randomAssignTreasure() {
@@ -199,7 +192,7 @@ public class GameStatus implements Serializable {
     }
 
 
-    // Method for update player list by removing the unexists player List
+    // Method for update player list by removing the non-existing player from the List
     public void updatePlayerList(List<String> existPlayerList) {
         Set<String> wholePlayerSet = new HashSet<>(playerPositionMap.keySet());
         wholePlayerSet.removeAll(existPlayerList);

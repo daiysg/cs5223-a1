@@ -3,9 +3,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-/**
- * Created by ydai on 23/9/17.
- */
+//TODO: Is this class in use at all?
 public class Utils {
 
     /**

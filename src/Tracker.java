@@ -7,14 +7,9 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by ydai on 9/9/17.
- */
+
 public class Tracker extends UnicastRemoteObject implements ITracker, Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     private List<IGame> serverList;
@@ -58,8 +53,9 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     @Override
     public synchronized List<IGame> joinGame(String host, int port, String playerId) throws RemoteException, MalformedURLException, NotBoundException {
-        // TODO: Should we move this logic to Game class and let master call Tracker.setServerList to update Tracker's serverList? Prof wants Tracker to be as light as possible
-        // The 1st gamer joining in is the Master; the 2nd gamer joining in is the Slave
+        // The 1st player joining the game is the Master.
+        // The 2nd player joining the game is the Slave.
+
         Logging.printInfo("ASK start to joining game, playerid:" + playerId);
 
         String url = new String("//" + host + ":" +  + port + "/"+ playerId);
@@ -74,6 +70,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         } else if (serverList.size() == 2) {
             game.setSlave(true);
         }
+
         printCurrentServerStatus();
         return serverList;
     }
@@ -84,10 +81,9 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         int i = 0;
         for (IGame iGame : serverList) {
             i++;
-            Logging.printInfo("Player " + i + ". -- Player id: " + iGame.getId() + " is Master " + iGame.getIsMaster() + " is Slave " + iGame.getIsSlave());
+            Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() + "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
         }
     }
-
 
     @Override
     public void initGame(int n, int k) throws RemoteException {

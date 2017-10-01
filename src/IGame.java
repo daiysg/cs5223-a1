@@ -1,5 +1,3 @@
-
-
 import java.net.MalformedURLException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
@@ -51,7 +49,7 @@ public interface IGame extends Remote {
 
     /**
      * Tracker call master for adding new player
-     * @param game
+     * @param playerId
      * @throws RemoteException
      */
     boolean addNewPlayer(String playerId) throws RemoteException, MalformedURLException, NotBoundException;

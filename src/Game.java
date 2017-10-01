@@ -10,17 +10,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.stream.Collectors;
 
-/**
- * Created by ydai on 16/9/17.
- * <p>
- * Refer to Peer
- */
+
 public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 3L;
 
     //playerId which is the name of this game
     private String playerId;
@@ -268,11 +262,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
         serverGameStatus.prepareForNewPlayer(playerId);
 
-        gameStatusUpdatePlayerList();
-
         if (gameList.size() == 2) {
             game.setSlave(true);
         }
+
+        gameStatusUpdatePlayerList();
 
         game.startGame(serverGameStatus);
         return true;
