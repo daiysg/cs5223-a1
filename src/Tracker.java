@@ -98,7 +98,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     }
 
     @Override
-    public void setServerList(List<IGame> serverList) throws RemoteException {
+    public synchronized void setServerList(List<IGame> serverList) throws RemoteException {
         this.serverList = serverList;
         printCurrentServerStatus();
     }
