@@ -10,17 +10,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.stream.Collectors;
 
-/**
- * Created by ydai on 16/9/17.
- * <p>
- * Refer to Peer
- */
+
 public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = 3L;
 
     //playerId which is the name of this game
     private String playerId;
@@ -116,7 +110,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     @Override
     public synchronized void askTrackerJoinGame() throws RemoteException, NotBoundException, MalformedURLException {
         initGameStatus();
-        this.gameList = tracker.joinGame(playerId);
+        this.gameList = tracker.joinGame(host, port, playerId);
 
         if (gameList.size() == 1) {
             isMaster = true;
@@ -248,7 +242,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             return false;
         }
 
-        String url = new String("rmi://localhost:" + port + "/" + playerId);
+        String url = new String("//" + host + ":" + port + "/" + playerId);
         IGame game = (IGame) Naming.lookup(url);
         gameList.add(game);
 
@@ -259,11 +253,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
         serverGameStatus.prepareForNewPlayer(playerId);
 
-        gameStatusUpdatePlayerList();
-
         if (gameList.size() == 2) {
             game.setSlave(true);
         }
+
+        gameStatusUpdatePlayerList();
 
         game.startGame(serverGameStatus);
         return true;
@@ -456,7 +450,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     private void quitGame(String playerId) throws WrongGameException, RemoteException, MalformedURLException, NotBoundException {
 
 
-        String url = new String("rmi://localhost:" + port + "/" + playerId);
+        String url = new String("//" + host + ":" + port + "/" + playerId);
         IGame game = (IGame) Naming.lookup(url);
 
         if (game.getIsMaster()) {

@@ -1,5 +1,3 @@
-
-
 import java.net.MalformedURLException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;

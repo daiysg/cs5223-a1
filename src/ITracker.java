@@ -4,9 +4,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 
-/**
- * Created by ydai on 16/9/17.
- */
+
 public interface ITracker extends Remote {
 
     Integer getPort() throws RemoteException;
@@ -20,13 +18,13 @@ public interface ITracker extends Remote {
     GameStatus test(GameStatus gameStatus) throws RemoteException;
 
     /**
-     * Player call tracker to join game
+     * Master (1st player) call tracker to join game
      *
-     * @param game
+     * @param host, port, playerId
      * @return
      * @throws RemoteException
      */
-    //List<IGame> joinGame(IGame game) throws RemoteException;
+    List<IGame> joinGame(String host, int port, String playerId) throws RemoteException, MalformedURLException, NotBoundException;
 
     /**
      *
@@ -34,12 +32,9 @@ public interface ITracker extends Remote {
     void initGame(int n, int k) throws RemoteException;
 
     /**
-     * master update Tracker with new Game List
-     * Get the player list
+     * Master update Tracker with new Game List
      *
      * @param serverList
      */
     void setServerList(List<IGame> serverList) throws RemoteException;
-
-    List<IGame> joinGame(String playerId) throws RemoteException, MalformedURLException, NotBoundException;
 }
