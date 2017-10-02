@@ -15,7 +15,7 @@ public class GameView {
 //        System.out.println("Status for player Id : " + playerId + " Master ID " + masterId );
 //        System.out.println();
 
-        System.out.println("\n\nWelcome to the game, Play " + playerId + "!");
+        System.out.println("\n\nWelcome to the game, Player " + playerId + "!");
         GameView.getGraphicalMaze(gameStatus);
         System.out.println();
         GameView.printPlayerInformation(gameStatus, masterId, slaveId);

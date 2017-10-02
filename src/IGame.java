@@ -25,21 +25,24 @@ public interface IGame extends Remote {
     void ping() throws RemoteException;
 
     /**
-     * Master to ping all players to check whether they are still alive
+     * Master to call Slave to start slavePingThread
      */
-//    void pingAllPlayers() throws RemoteException, WrongGameException, InterruptedException;
 
-    /**
-     * Slave to check whether Master is alive
-     */
-    void pingMaster() throws RemoteException, WrongGameException, InterruptedException;
+    void startSlavePingThread() throws RemoteException;
 
     /**
      *
-     * Master will call slave to update game status
+     * Master to call Slave to update game status
      *
      */
     void updateGameStatus(GameStatus gameStatus) throws RemoteException;
+
+    /**
+     *
+     * Master to call Slave to update game list
+     *
+     */
+    void updateGameList (List<IGame> gameList) throws RemoteException;
 
     /**
      * Master assign new slave if slave down
