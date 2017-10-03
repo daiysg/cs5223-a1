@@ -269,7 +269,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
      * Slave to ping Master to check whether Master is still alive
      */
 //    @Override
-    private synchronized void pingMaster() throws RemoteException, WrongGameException, InterruptedException {
+    private void pingMaster() throws RemoteException, WrongGameException, InterruptedException {
 
         // Only Slave can ping Master
 /*        if (!isSlave) {
