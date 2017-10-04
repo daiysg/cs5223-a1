@@ -142,8 +142,8 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         // Get port, n, k (if given). Use defaults otherwise.
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 1099;
-        int n = args.length > 1 ? Integer.parseInt(args[0]) : 5;
-        int k = args.length > 2 ? Integer.parseInt(args[1]) : 5;
+        int n = args.length > 1 ? Integer.parseInt(args[1]) : 15;
+        int k = args.length > 2 ? Integer.parseInt(args[2]) : 10;
         ITracker tracker = new Tracker(port, n, k);
         createTracker(tracker);
         tracker.initGame(n, k);
