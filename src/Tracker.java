@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.rmi.server.UnicastRemoteObject.*;
+
 
 public class Tracker extends UnicastRemoteObject implements ITracker, Serializable {
 
@@ -19,6 +21,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     private Integer port;
     private Integer n;
     private Integer k;
+    private String  masterId;
 
     @Override
     public Integer getPort() throws RemoteException {
@@ -59,7 +62,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         // The 1st player joining the game is the Master.
         // The 2nd player joining the game is the Slave.
 
-        Logging.printInfo("ASK start to joining game, playerid:" + playerId);
+        Logging.printInfo("ASK start to joining game, playerId:" + playerId);
 
         String url = new String("//" + host + ":" + port + "/" + playerId);
         Logging.printDebug("player lookup url = " + url.toString());
@@ -70,6 +73,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         if (serverList.size() == 1) {
             game.setMaster(true);
+            masterId = playerId;
         } else if (serverList.size() == 2) {
             game.setSlave(true);
         }
@@ -120,7 +124,30 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     @Override
     public synchronized List<IGame> setServerList(List<IGame> inputServerList) throws RemoteException {
-        this.serverList = validateGameList(inputServerList);
+        List<IGame> newList = validateGameList(inputServerList);
+
+        if (!masterId.equals(newList.get(0).getId()))
+        {
+            // Master has changed
+            // remove old Master's stub from rmiregistry
+            Logging.printDebug("old Master = " + masterId + " new Master = " + newList.get(0).getId());
+
+            String url = new String("//localhost:" + port + "/" + masterId);
+            Logging.printDebug("old Master's lookup url = " + url.toString());
+
+            try {
+//                IGame oldMaster = (IGame) Naming.lookup(url);
+//                UnicastRemoteObject.unexportObject(Naming.lookup(url), true);
+                Naming.unbind(url);
+            } catch (Exception e) {
+                Logging.printException(e);
+            }
+
+        }
+
+        this.serverList = newList;
+
+//        this.serverList = validateGameList(inputServerList);
         printCurrentServerStatus();
         return serverList;
     }
