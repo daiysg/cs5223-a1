@@ -7,9 +7,9 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+//import java.util.stream.Collectors;
 
-import static java.rmi.server.UnicastRemoteObject.*;
+//import static java.rmi.server.UnicastRemoteObject.*;
 
 
 public class Tracker extends UnicastRemoteObject implements ITracker, Serializable {
@@ -21,7 +21,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
     private Integer port;
     private Integer n;
     private Integer k;
-    private String  masterId;
+//    private String  masterId;
 
     @Override
     public Integer getPort() throws RemoteException {
@@ -48,7 +48,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     @Override
     public List<IGame> getServerList() throws RemoteException {
-        serverList = validateGameList(serverList);
+//        serverList = validateGameList(serverList);
         return serverList;
     }
 
@@ -73,11 +73,11 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         if (serverList.size() == 1) {
             game.setMaster(true);
-            masterId = playerId;
+//            masterId = playerId;
         } else if (serverList.size() == 2) {
             game.setSlave(true);
         }
-        this.serverList = validateGameList(serverList);
+//        this.serverList = validateGameList(serverList);
 
         printCurrentServerStatus();
         return serverList;
@@ -85,7 +85,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     private void printCurrentServerStatus() throws RemoteException {
 
-        boolean hasMaster = false;
+ /*       boolean hasMaster = false;
         boolean hasSlave = false;
         Logging.printInfo("Current Gamer Status!!!! GameList Size = " + serverList.size());
         try {
@@ -113,8 +113,20 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         if (hasSlave == false && serverList.size() > 1) {
             serverList.get(1).setSlave(true);
-        }
+        }*/
 
+        Logging.printInfo("Current Gamer Status!!!! GameList Size = " + serverList.size());
+        int i = 0;
+        for (IGame iGame : serverList) {
+            i++;
+            try {
+                Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() +
+                        "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
+            } catch (RemoteException e){
+                e.printStackTrace();
+                Logging.printException(e);
+            }
+        }
     }
 
     @Override
@@ -125,7 +137,8 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
     @Override
     public synchronized List<IGame> setServerList(List<IGame> inputServerList) throws RemoteException {
-        List<IGame> newList = validateGameList(inputServerList);
+//        List<IGame> newList = validateGameList(inputServerList);
+/*        List<IGame> newList = inputServerList;
 
         if (!masterId.equals(newList.get(0).getId()))
         {
@@ -141,18 +154,18 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
                 e.printStackTrace();
                 Logging.printException(e);
             }
-
         }
 
-        this.serverList = newList;
+        this.serverList = newList;*/
 
 //        this.serverList = validateGameList(inputServerList);
+        this.serverList = inputServerList;
         printCurrentServerStatus();
         return serverList;
     }
 
 
-    private List<IGame> validateGameList(List<IGame> serverList) throws RemoteException {
+/*    private List<IGame> validateGameList(List<IGame> serverList) throws RemoteException {
 
         return new ArrayList<>(serverList.parallelStream().filter(game -> {
             try {
@@ -162,7 +175,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
                 return false;
             }
         }).collect(Collectors.toList()));
-    }
+    }*/
 
     public static void main(String[] args) throws RemoteException, NotBoundException, AlreadyBoundException, MalformedURLException {
 
@@ -180,8 +193,6 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         // Start Tracker at localhost
         String url = new String("//localhost:" + tracker.getPort() + "/tracker");
         Logging.printDebug("tracker binding url = " + url.toString());
-
-//        Naming.rebind(url, tracker);
 
         //try and retry for 3 times
         try {
