@@ -100,8 +100,9 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
                 i++;
                 Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() + "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logging.printException(e);
         }
 
 
@@ -137,6 +138,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
             try {
                 Naming.unbind(url);
             } catch (Exception e) {
+                e.printStackTrace();
                 Logging.printException(e);
             }
 
@@ -156,7 +158,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
             try {
                 game.ping();
                 return true;
-            } catch (Exception ex) {
+            } catch (Exception e) {
                 return false;
             }
         }).collect(Collectors.toList()));
@@ -186,12 +188,15 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
             Naming.rebind(url, tracker);
         } catch (Exception e) {
             try {
+                Thread.sleep (100);
                 Naming.rebind(url, tracker);
             } catch (Exception e2) {
                 try {
+                    Thread.sleep (100);
                     Naming.rebind(url, tracker);
                 } catch (Exception e3) {
                     e3.printStackTrace();
+                    Logging.printException(e3);
                     return;
                 }
             }
