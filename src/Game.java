@@ -1,5 +1,3 @@
-import sun.rmi.runtime.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -68,7 +66,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     private Integer numOfStep = 0;
 
-    private Boolean falseQuit = false;
+    private Boolean forceQuite = false;
 
     private String host;
     private int port;
@@ -409,12 +407,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             gameList = tracker.setServerList(new ArrayList<>(gameList));
             updateIGamePlayerIdMap();
 
-            //stop the thread used by old Slave to ping Master
-            if (this.slavePingThread != null) {
-                this.slavePingThread.interrupt();
-                Logging.printDebug("Stop slavePingThread for playerId = " + playerId + " isMaster = " + isMaster + " isSlave = " + isSlave);
-            }
-
             //start the thread used by the new Master to ping all players
             this.startMasterPingThread();
 
@@ -422,6 +414,12 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 assignNewSlave(serverGameStatus);
             } catch (Exception e) {
                 Logging.printError("Failed to assign new Slave. ");
+            }
+
+            //stop the thread used by old Slave to ping Master
+            if (this.slavePingThread != null) {
+                Logging.printDebug("Interrupt slavePingThread for playerId = " + playerId + " isMaster = " + isMaster + " isSlave = " + isSlave);
+                this.slavePingThread.interrupt();
             }
         }
     }
@@ -487,7 +485,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         this.gameInputThread = new Thread() {
             public void run() {
-                while (!falseQuit) {
+                while (!forceQuite) {
                     try {
                         movePlayerInput();
                     } catch (Exception e) {
@@ -512,11 +510,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         this.masterPingThread = new Thread() {
             public void run() {
-                while (!falseQuit) {
+                while (!forceQuite && isMaster) {
                     try {
                         pingAllPlayers();
                     }catch (Exception e) {
-                        e.printStackTrace();
+                        Logging.printException(e);
                     }
                 }
             }
@@ -538,11 +536,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         this.slavePingThread = new Thread() {
             public void run() {
-                while (!falseQuit) {
+                while (!forceQuite && isSlave) {
                     try {
                         pingMaster(); //TODO
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Logging.printException(e);
                     }
                 }
             }
@@ -562,7 +560,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         do {
             try {
                 Logging.printInfo("Player " + playerId + ", please enter your input (0: refresh, 1: West, 2: South, 3: East, 4: North, 9: Quit)");
-                if (falseQuit) {
+                if (forceQuite) {
                     return;
                 }
                 while (!br.ready()) {
@@ -572,7 +570,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 Logging.printInfo("Waiting for your input for Player :" + playerId);
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Logging.printException(e);
                 return;
             }
         } while ("".equals(input));
@@ -584,7 +582,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         IGame master = null;
         try {
             master = getMaster();
-        } catch (Exception ex) {
+        } catch (Exception e) {
             Thread.sleep (200); //wait for 200ms for new Master to come online
             gameList = tracker.getServerList();
             updateIGamePlayerIdMap();
@@ -592,7 +590,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             try {
                 // original Master down, try to get new Master
                 master = getMaster();
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 Logging.printError("Player " + playerId + " can't find new Master!!!");
             }
         }
@@ -872,7 +870,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 this.slavePingThread.interrupt();
             }
 
-            falseQuit = true;
+            forceQuite = true;
         } catch (Exception ex) {
             ex.printStackTrace();
         }

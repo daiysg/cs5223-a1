@@ -129,15 +129,12 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
         if (!masterId.equals(newList.get(0).getId()))
         {
             // Master has changed
-            // remove old Master's stub from rmiregistry
             Logging.printDebug("old Master = " + masterId + " new Master = " + newList.get(0).getId());
 
             String url = new String("//localhost:" + port + "/" + masterId);
             Logging.printDebug("old Master's lookup url = " + url.toString());
 
             try {
-//                IGame oldMaster = (IGame) Naming.lookup(url);
-//                UnicastRemoteObject.unexportObject(Naming.lookup(url), true);
                 Naming.unbind(url);
             } catch (Exception e) {
                 Logging.printException(e);

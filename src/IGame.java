@@ -100,6 +100,6 @@ public interface IGame extends Remote {
 
     GameStatus getServerGameStatus() throws RemoteException;
 
-    void quit() throws NoSuchObjectException, RemoteException;
+    void quit() throws RemoteException;
 
 }
