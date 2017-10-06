@@ -122,7 +122,7 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
             try {
                 Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() +
                         "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
-            } catch (RemoteException e){
+            } catch (Exception e){
                 e.printStackTrace();
                 Logging.printException(e);
             }
