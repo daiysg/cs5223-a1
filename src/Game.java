@@ -241,6 +241,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             try {
 //                Logging.printDebug("Ping from Master to Slave: " + slaveId);
                 slave.ping();
+                if (slave.getIsSlave() == false) {
+                    assignNewSlave(serverGameStatus);
+                }
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -727,7 +730,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 slave.updateGameStatus(serverGameStatus);
                 slave.updateGameList(gameList);
             } catch (RemoteException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 Logging.printException(e);
 
                 //slave is down, need to assign new slave;
