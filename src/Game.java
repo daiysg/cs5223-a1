@@ -229,8 +229,8 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
 
         if (gameList.size() >= 2){
-            IGame slave = getSlave();
-            String slaveId = slave.getId();
+            IGame slave = gameList.get(1);
+            String slaveId = iGamePlayerIdMap.get(slave);
             try {
 //                Logging.printDebug("Ping from Master to Slave: " + slaveId);
                 slave.ping();
@@ -262,7 +262,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         if (gameList.size() > 2){
             IGame slave = getSlave();
             for (IGame iGame : gameList.subList(2, gameList.size())) {
-                String gameId = iGame.getId();
+                String gameId = iGamePlayerIdMap.get(iGame);
                 try {
 //                    Logging.printDebug("Ping from Master to Player: " + gameId);
                     iGame.ping();
