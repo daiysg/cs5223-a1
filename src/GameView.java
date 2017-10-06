@@ -130,7 +130,7 @@ public class GameView {
 
 
         // print slave if exists
-        if (slaveId != null || slaveId != "") {
+        if (slaveId != null && slaveId != "") {
             try {
                 playersInfo.add(
                         "| " + slaveId + "(S) |" +
