@@ -41,7 +41,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     private GameStatus serverGameStatus;
 
     //timer for ping
-    protected Timer pingTimer;
+//    protected Timer pingTimer;
 
     /**
      * Connected tracker
@@ -910,14 +910,24 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         try {
             UnicastRemoteObject.unexportObject(this, true);
 
+            String url = new String("//" + host + ":" + port + "/" + playerId);
+            Logging.printDebug("trying to unbind player's lookup url = " + url.toString());
+
+            try {
+                Naming.unbind(url);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Logging.printException(e);
+            }
+
             Logging.printInfo("Player QUIT, player ID: " + playerId);
             if (this.gameInputThread != null) {
                 this.gameInputThread.interrupt();
             }
 
-            if (this.pingTimer != null) {
+/*            if (this.pingTimer != null) {
                 this.pingTimer.cancel();
-            }
+            }*/
 
             if (this.masterPingThread != null) {
                 this.masterPingThread.interrupt();

@@ -199,11 +199,11 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
             Naming.rebind(url, tracker);
         } catch (Exception e) {
             try {
-                Thread.sleep (100);
+                Thread.sleep (200);
                 Naming.rebind(url, tracker);
             } catch (Exception e2) {
                 try {
-                    Thread.sleep (100);
+                    Thread.sleep (200);
                     Naming.rebind(url, tracker);
                 } catch (Exception e3) {
                     e3.printStackTrace();
