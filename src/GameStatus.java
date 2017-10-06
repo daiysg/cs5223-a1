@@ -167,8 +167,9 @@ public class GameStatus implements Serializable {
     public void playerQuit(String playerId) {
         // remove player from playerPosition;
         Position position = this.playerPositionMap.get(playerId);
-        playerPositionList[position.getX()][position.getY()] = null;
-
+        if (position != null) {
+            playerPositionList[position.getX()][position.getY()] = null;
+        }
         // remove player from playerLastMoveMap
         playerLastMoveMap.remove(playerId);
         playerTreasureMap.remove(playerId);

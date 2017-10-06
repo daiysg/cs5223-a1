@@ -77,7 +77,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         this.gameStart = false;
 
         this.gameList = new ArrayList<>();
-        this.iGamePlayerIdMap = new HashMap<>();
+        this.iGamePlayerIdMap = new LinkedHashMap<>();
         this.serverGameStatus = null;
 
         this.gameInputThread = null;
@@ -159,11 +159,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         updateIGamePlayerIdMap();
 
 
-        if (gameList.size() == 1) {
+        /*if (gameList.size() == 1) {
             isMaster = true;
         } else if (gameList.size() == 2) {
             isSlave = true;
-        }
+        }*/
     }
 
     @Override
@@ -180,10 +180,13 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             try {
                 iGamePlayerIdMap.put(iGame,iGame.getId());
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 Logging.printException(e);
             }
         }
+
+        gameList = new ArrayList<>(iGamePlayerIdMap.keySet());
+        serverGameStatus.updatePlayerList(new ArrayList<>(iGamePlayerIdMap.values()));
         printPlayerIds();
     }
 
@@ -229,8 +232,8 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
 
         if (gameList.size() >= 2){
-            IGame slave = getSlave();
-            String slaveId = slave.getId();
+            IGame slave = gameList.get(1);
+            String slaveId = iGamePlayerIdMap.get(slave);
             try {
 //                Logging.printDebug("Ping from Master to Slave: " + slaveId);
                 slave.ping();
@@ -260,9 +263,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
         if (gameList.size() > 2){
-            IGame slave = getSlave();
+            IGame slave = gameList.get(1);
             for (IGame iGame : gameList.subList(2, gameList.size())) {
-                String gameId = iGame.getId();
+                String gameId = iGamePlayerIdMap.get(iGame);
                 try {
 //                    Logging.printDebug("Ping from Master to Player: " + gameId);
                     iGame.ping();
@@ -281,7 +284,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     this.gameList.remove(iGame);
                     updateIGamePlayerIdMap();
                     tracker.setServerList(gameList);
-
+                    slave.setServerGameStatus(serverGameStatus);
                     slave.updateGameList(gameList);
 
                     return;
@@ -306,7 +309,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 //        Logging.printDebug("pingMaster() - 1: gameList.size() = " + gameList.size());
         if (gameList.size() >= 1 ){
-            IGame master = getMaster();
+            IGame master = gameList.get(0);
             String masterId = iGamePlayerIdMap.get(master);
             try {
                 if (master != this) {
@@ -663,7 +666,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 master = getMaster();
             } catch (RemoteException e2) {
                 Logging.printInfo("movePlayerInput(): Master is still down!!! Wait...... gameList.size() = " + gameList.size());
-                Thread.sleep (500);
+                Thread.sleep (100);
                 try {
                     master = getMaster();
                     // make a move
@@ -795,7 +798,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             try {
                 return gamer.getId();
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 Logging.printException(e);
                 return null;
             }
