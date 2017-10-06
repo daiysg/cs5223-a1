@@ -235,7 +235,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 //                Logging.printDebug("Ping from Master to Slave: " + slaveId);
                 slave.ping();
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(100);
                 } catch (InterruptedException e){
                     Logging.printException(e);
                     Logging.printDebug("pingAllPlayers() 2 - It's OK for the thread to be interrupted during sleep." );
@@ -267,7 +267,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 //                    Logging.printDebug("Ping from Master to Player: " + gameId);
                     iGame.ping();
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     } catch (InterruptedException e){
                         Logging.printException(e);
                         Logging.printDebug("pingAllPlayers() 3 - It's OK for the thread to be interrupted during sleep." );
@@ -314,7 +314,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     master.ping();
                     //Slave to ping Master every 0.5 sec
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     } catch (InterruptedException e){
                         Logging.printException(e);
                         Logging.printDebug("pingMaster() - It's OK for the thread to be interrupted during sleep." );
