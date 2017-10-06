@@ -131,12 +131,19 @@ public class GameView {
 
         // print slave if exists
         if (slaveId != "") {
-            playersInfo.add(
-                    "| " + slaveId + "(S) |" +
-                    placeScoreInMiddle(gameStatus.getPlayerTreasureMap().get(slaveId).toString(), 7) +
-                    "|"
-            );
-            playersInfo.add("+-------+-------+");
+            try {
+                playersInfo.add(
+                        "| " + slaveId + "(S) |" +
+                                placeScoreInMiddle(gameStatus.getPlayerTreasureMap().get(slaveId).toString(), 7) +
+                                "|"
+                );
+                playersInfo.add("+-------+-------+");
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+                Logging.printException(e);
+            }
+
         }
 
         // print the rest players
