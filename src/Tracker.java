@@ -69,17 +69,23 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
         IGame game = (IGame) Naming.lookup(url);
 
-        serverList.add(game);
+        //serverList.add(game);
 
-        if (serverList.size() == 1) {
+        if (serverList.size() == 0) {
+            Logging.printInfo("You are Master !!! " + game.getId());
             game.setMaster(true);
+            serverList.add(game);
 //            masterId = playerId;
-        } else if (serverList.size() == 2) {
-            game.setSlave(true);
+        } else {
+            game.setMaster(false);
         }
+        /**
+        else if (serverList.size() == 1) {
+            game.setSlave(true);
+        }*/
 //        this.serverList = validateGameList(serverList);
 
-        printCurrentServerStatus();
+        //printCurrentServerStatus();
         return serverList;
     }
 
@@ -123,8 +129,8 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
                 Logging.printInfo("Player " + i + ". playerId = " + iGame.getId() +
                         "; isMaster = " + iGame.getIsMaster() + "; isSlave = " + iGame.getIsSlave());
             } catch (Exception e){
-                e.printStackTrace();
-                Logging.printException(e);
+                //e.printStackTrace();
+                //Logging.printException(e);
             }
         }
     }

@@ -90,7 +90,7 @@ public class GameStatus implements Serializable {
         return this.treasurePosition[x][y] != 1;
     }
 
-    public void movePlayer(String playerId, Direction direction, int numOfStep) {
+    public synchronized void movePlayer(String playerId, Direction direction, int numOfStep) {
         Position position = this.playerPositionMap.get(playerId);
 
         if (position == null) {
@@ -134,7 +134,7 @@ public class GameStatus implements Serializable {
 
     private void randomAssignTreasure() {
         Position position = getAvailRandomPosition();
-        while (!isTreasureVacantCell(position.getX(), position.getY())){
+        while (!isTreasureVacantCell(position.getX(), position.getY())) {
             position = getAvailRandomPosition();
         }
         treasurePosition[position.getX()][position.getY()] = 1;
@@ -167,12 +167,26 @@ public class GameStatus implements Serializable {
     public void playerQuit(String playerId) {
         // remove player from playerPosition;
         Position position = this.playerPositionMap.get(playerId);
-        playerPositionList[position.getX()][position.getY()] = null;
+        if (position != null) {
+            playerPositionList[position.getX()][position.getY()] = null;
+        }
 
+        removePlayerIdInAllPlace(playerId);
         // remove player from playerLastMoveMap
         playerLastMoveMap.remove(playerId);
         playerTreasureMap.remove(playerId);
         playerPositionMap.remove(playerId);
+    }
+
+    private void removePlayerIdInAllPlace(String playerId) {
+
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                if (playerPositionList[i][j] == playerId) {
+                    playerPositionList[i][j] = null;
+                }
+            }
+        }
     }
 
     public int getGridSize() {
@@ -200,7 +214,20 @@ public class GameStatus implements Serializable {
     }
 
     public String getPlayerAt(int j, int i) {
-        return playerPositionList[j][i];
+        String playerId =  playerPositionList[j][i];
+        if (playerId == null || playerId.isEmpty()) return null;
+        Position position = playerPositionMap.get(playerId);
+        if (position == null) {
+            playerPositionList[j][i] = null;
+            return null;
+        }
+        if (position.getX() == j && position.getY() == i) {
+            return playerId;
+        } else {
+            //wrong player position
+            playerPositionList[j][i] = null;
+            return null;
+        }
     }
 
     public int getTreasureAt(int j, int i) {
