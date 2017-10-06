@@ -9,10 +9,10 @@ public class Logging {
     }
 
     public static void printDebug(String message){
-        System.out.println ("DEBUG:: " + message);
+        //System.out.println ("DEBUG:: " + message);
     }
 
     public static void printException (Exception e) {
-        System.out.println("=== EXCEPTION === :: " + e);
+        //System.out.println("=== EXCEPTION === :: " + e);
     }
 }
