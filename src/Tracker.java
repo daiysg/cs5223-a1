@@ -166,7 +166,6 @@ public class Tracker extends UnicastRemoteObject implements ITracker, Serializab
 
 //        this.serverList = validateGameList(inputServerList);
         this.serverList = inputServerList;
-        Logging.printInfo("New Set Game~~~~~~");
         printCurrentServerStatus();
         return serverList;
     }

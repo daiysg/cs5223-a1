@@ -128,8 +128,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             }
         }
 
-        updateIGamePlayerIdMap();
-
         if (getSlave() == null)
             GameView.printGameSummary(serverGameStatus, playerId, getMaster().getId(), "");
         else
@@ -155,9 +153,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 }
             }
         }
-
-        updateIGamePlayerIdMap();
-
 
         /*if (gameList.size() == 1) {
             isMaster = true;
