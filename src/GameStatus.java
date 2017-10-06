@@ -90,7 +90,7 @@ public class GameStatus implements Serializable {
         return this.treasurePosition[x][y] != 1;
     }
 
-    public void movePlayer(String playerId, Direction direction, int numOfStep) {
+    public synchronized void movePlayer(String playerId, Direction direction, int numOfStep) {
         Position position = this.playerPositionMap.get(playerId);
 
         if (position == null) {
@@ -214,7 +214,20 @@ public class GameStatus implements Serializable {
     }
 
     public String getPlayerAt(int j, int i) {
-        return playerPositionList[j][i];
+        String playerId =  playerPositionList[j][i];
+        if (playerId == null || playerId.isEmpty()) return null;
+        Position position = playerPositionMap.get(playerId);
+        if (position == null) {
+            playerPositionList[j][i] = null;
+            return null;
+        }
+        if (position.getX() == j && position.getY() == i) {
+            return playerId;
+        } else {
+            //wrong player position
+            playerPositionList[j][i] = null;
+            return null;
+        }
     }
 
     public int getTreasureAt(int j, int i) {

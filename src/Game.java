@@ -739,7 +739,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
         Logging.printInfo("move(): Player ID " + playerId + " move is finished!!. Direction:" + direction + " master:" + this.playerId);
-        printPlayerIds();
+        updateIGamePlayerIdMap();
         return serverGameStatus;
     }
 
