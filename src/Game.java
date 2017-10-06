@@ -294,7 +294,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             String masterId = iGamePlayerIdMap.get(master);
             try {
                 if (master != this) {
-                Logging.printDebug("Ping from Slave (" + playerId + ") to Master (" + masterId + "). gameList.size() = " + gameList.size());
+//                Logging.printDebug("Ping from Slave (" + playerId + ") to Master (" + masterId + "). gameList.size() = " + gameList.size());
                     master.ping();
                     //Slave to ping Master every 0.5 sec
                     Thread.sleep(500);
@@ -409,7 +409,8 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             isMaster = true;
 
             gameList = tracker.getServerList(); //serverList from the Tracker might be outdated now.
-            Logging.printDebug("ZH: 3 gameList.size() = " + gameList.size());
+            Logging.printDebug("slaveBecomeMaster() - gameList.size() = " + gameList.size()
+                    + " oldMasterId = " + oldMasterId);
 
             try {
                 if (oldMasterId != null) {
@@ -625,38 +626,39 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             // make a move
             GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
             serverGameStatus = gameStatus;
-
-            if (direction.getDirecton() != 9) {
-                this.serverGameStatus = gameStatus;
-                if (getSlave() == null)
-                    GameView.printGameSummary(serverGameStatus, playerId, master.getId(), "");
-                else
-                    GameView.printGameSummary(serverGameStatus, playerId, master.getId(), getSlave().getId());
-                Logging.printInfo("Your move is finished :" + direction.getDirecton() + " for player ID " + playerId);
-                numOfStep++;
-            }
         } catch (RemoteException e) {
             //Master Failed, Slave becomes new Master
             e.printStackTrace();
             Logging.printException(e);
-            Logging.printInfo("movePlayerInput(): Master is down.");
+            Logging.printInfo("movePlayerInput(): Master is down!!! gameList.size() = " + gameList.size());
 
-            //TODO
-/*
-            IGame newMaster = this.getSlave();
-            if (newMaster != null) {
-                //update slave game status
-                if (master == null) {
-                    newMaster.slaveBecomeMaster(null);
-                } else {
-                    newMaster.slaveBecomeMaster(master.getId());
+            Thread.sleep(500); // wait for new Master to come online;]
+
+            try {
+                master = getMaster();
+            } catch (RemoteException e2) {
+                Logging.printInfo("movePlayerInput(): Master is still down!!! Wait...... gameList.size() = " + gameList.size());
+                Thread.sleep (200);
+                try {
+                    master = getMaster();
+                    // make a move
+                    GameStatus gameStatus = master.move(this.playerId, direction, numOfStep);
+                    serverGameStatus = gameStatus;
+                } catch (RemoteException e3){
+                    e3.printStackTrace();
+                    Logging.printException(e3);
+                    Logging.printError("movePlayerInput(): Master is still down!!! There's something wrong! gameList.size() = " + gameList.size());
                 }
-                GameStatus gameStatus = newMaster.move(this.playerId, direction, numOfStep);
-                this.serverGameStatus = gameStatus;
-                numOfStep++;
-
             }
-*/
+        }
+
+        if (direction.getDirecton() != 9) {
+            if (getSlave() == null)
+                GameView.printGameSummary(serverGameStatus, playerId, master.getId(), "");
+            else
+                GameView.printGameSummary(serverGameStatus, playerId, master.getId(), getSlave().getId());
+            Logging.printInfo("Your move is finished :" + direction.getDirecton() + " for player ID " + playerId);
+            numOfStep++;
         }
     }
 
@@ -756,13 +758,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }).filter(id -> id != null).collect(Collectors.toList()));
     }
 
-    /**
-     * From master to update player and gamer status
-     *
-     * @param iGameId
-     */
+
     private synchronized void removeFailedGamer(String iGameId) throws RemoteException {
-        //remove Failed Player
+        // Master to remove Failed Player and update game status.
         serverGameStatus.playerQuit(iGameId);
     }
 
