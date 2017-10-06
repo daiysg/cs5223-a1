@@ -306,7 +306,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 //        Logging.printDebug("pingMaster() - 1: gameList.size() = " + gameList.size());
         if (gameList.size() >= 1 ){
-            IGame master = gameList.get(0);
+            IGame master = getMaster();
             String masterId = iGamePlayerIdMap.get(master);
             try {
                 if (master != this) {
@@ -422,7 +422,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         return serverGameStatus;
     }*/
 
-    //Slave call the function to make itself the new Master
+    //Slave call the function to make itself the new Master when master crashes
     @Override
     public synchronized void slaveBecomeMaster(String oldMasterId) throws RemoteException {
         if (isSlave) {
@@ -617,8 +617,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     Thread.sleep(200);
                 }
                 input = br.readLine();
-                Logging.printInfo("Waiting for your input for Player :" + playerId);
-
+//                Logging.printInfo("Waiting for your input for Player :" + playerId);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Logging.printException(e);
@@ -690,22 +689,24 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
     @Override
     public synchronized GameStatus move(String playerId, Direction direction, int numOfStep) throws RemoteException, WrongGameException, MalformedURLException, NotBoundException {
+        Logging.printInfo("enter 9move(): Player " + playerId + " enter move() function");
         if (this.isMaster == false) {
+            Logging.printInfo("move(): Player " + playerId + " is going to quit");
             throw new WrongGameException("I am Not Master, please do not call me dude....");
         }
 
         if (direction == Direction.QUIT) {
             try {
+                Logging.printInfo("move(): Player " + playerId + " is going to quit");
                 quitGame(playerId);
             } catch (Exception e) {
                 e.printStackTrace();
                 Logging.printException(e);
             }
-
             return serverGameStatus;
         }
 
-        Logging.printInfo("Player ID " + playerId + " is asking for Move. Direction:" + direction + " master:" + this.playerId);
+        Logging.printInfo("move(): Player ID " + playerId + " is asking for Move. Direction:" + direction + " master:" + this.playerId);
 
         serverGameStatus.movePlayer(playerId, direction, numOfStep);
 
@@ -724,49 +725,66 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             }
         }
 
-        Logging.printInfo("Player ID " + playerId + " move is finished!!. Direction:" + direction + " master:" + this.playerId);
+        Logging.printInfo("move(): Player ID " + playerId + " move is finished!!. Direction:" + direction + " master:" + this.playerId);
 
         return serverGameStatus;
     }
 
 
     private void quitGame(String playerId) throws WrongGameException, RemoteException, MalformedURLException, NotBoundException, InterruptedException {
+        Logging.printInfo("enter quitGame(): " + playerId);
+        if (this.isMaster == false) {
+            throw new WrongGameException("quitGame(): I am Not Master, please do not call me dude....");
+        }
 
         IGame game = Utils.connectToGame(host, port, playerId);
 
         if (game.getIsMaster()) {
             // Master wants to quit the game, assign Slave as new Master
+            Logging.printInfo("quitGame(): Master " + playerId + " is going to quit");
+
             IGame newMaster = this.getSlave();
             if (newMaster != null) {
-                //update Slave game status //TODO
+
+                this.serverGameStatus.playerQuit(playerId);
+                this.gameList.remove(game);
+                this.updateIGamePlayerIdMap();
+                tracker.setServerList(this.gameList);
+
                 try {
-//                    newMaster.updateGameStatus(serverGameStatus);
-//                    newMaster.updateGameList(gameList);
                     newMaster.slaveBecomeMaster(this.playerId);
-                    newMaster.getServerGameStatus().playerQuit(playerId);
                 } catch (Exception e) {
                     e.printStackTrace();
                     Logging.printException(e);
                 }
+            } else {
+                // if cannot find slave and gameList size is 1, master is the only player in the game
+                if (this.gameList.size() == 1)
+                {
+                    this.serverGameStatus.playerQuit(playerId);
+                    this.gameList.clear();
+                    this.updateIGamePlayerIdMap();
+                    tracker.setServerList(this.gameList);
+                }
             }
         } else if (game.getIsSlave()) {
             // Slave wants to quit the game, Master assign new Slave
-            IGame master = this.getMaster();
+            Logging.printInfo("quitGame(): Slave " + playerId + " is going to quit");
 
-            master.getServerGameStatus().playerQuit(playerId);
+            this.serverGameStatus.playerQuit(playerId);
             this.gameList.remove(game);
-            updateIGamePlayerIdMap();
-            gameList = tracker.setServerList(new ArrayList<>(gameList));
+            this.updateIGamePlayerIdMap();
+            tracker.setServerList(this.gameList);
 
-            master.assignNewSlave(serverGameStatus);
+            this.assignNewSlave(serverGameStatus);
         } else {
             // a normal player wants to quit the game
-            IGame master = this.getMaster();
+            Logging.printInfo("quitGame(): Normal player " + playerId + "is going to quit");
 
-            master.getServerGameStatus().playerQuit(playerId);
+            this.serverGameStatus.playerQuit(playerId);
             this.gameList.remove(game);
-            updateIGamePlayerIdMap();
-            gameList = tracker.setServerList(new ArrayList<>(gameList));
+            this.updateIGamePlayerIdMap();
+            tracker.setServerList(this.gameList);
         }
 
         game.quit();
@@ -785,9 +803,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     }
 
 
-    private synchronized void removeFailedGamer(String iGameId) throws RemoteException {
+    private synchronized void removeFailedGamer(String playerId) throws RemoteException {
         // Master to remove Failed Player and update game status.
-        serverGameStatus.playerQuit(iGameId);
+        serverGameStatus.playerQuit(playerId);
     }
 
     private IGame getMaster() throws WrongGameException, RemoteException {
@@ -817,18 +835,33 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
         try {
-            if (gameList.size() >= 1 && gameList.get(0).getIsMaster()){
-                return gameList.get(0);
-            } else {
-                //retry
-                gameList = tracker.getServerList();
-                updateIGamePlayerIdMap();
-                if (gameList.size() >= 1 && gameList.get(0).getIsMaster()) {
-                    return gameList.get(0);
-                } else {
-                    throw new WrongGameException("No valid master");
+            for (int i = 0; i < gameList.size(); i++)
+            {
+                if (gameList.get(i).getIsMaster())
+                    return gameList.get(i);
+            }
+
+            gameList = tracker.getServerList();
+            updateIGamePlayerIdMap();
+            for (int i = 0; i < gameList.size(); i++) {
+                if (gameList.get(i).getIsMaster()) {
+                    return gameList.get(i);
                 }
             }
+            throw new WrongGameException("No valid master");
+
+//            if (gameList.size() >= 1 && gameList.get(0).getIsMaster()){
+//                return gameList.get(0);
+//            } else {
+//                //retry
+//                gameList = tracker.getServerList();
+//                updateIGamePlayerIdMap();
+//                if (gameList.size() >= 1 && gameList.get(0).getIsMaster()) {
+//                    return gameList.get(0);
+//                } else {
+//                    throw new WrongGameException("No valid master");
+//                }
+//            }
         } catch (Exception e){
             Logging.printException(e);
             gameList = tracker.getServerList();
@@ -844,19 +877,34 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         }
 
         try {
-            if (gameList.size() >= 2 && gameList.get(1).getIsSlave())
+            for (int i = 1; i < gameList.size(); i++)
             {
-                return gameList.get(1);
-            } else {
-                //retry
-                gameList = tracker.getServerList();
-                updateIGamePlayerIdMap();
-                if (gameList.size() >= 2 && gameList.get(1).getIsSlave()) {
-                    return gameList.get(1);
-                } else {
-                    return null;
+                if (gameList.get(i).getIsSlave())
+                    return gameList.get(i);
+            }
+
+            gameList = tracker.getServerList();
+            updateIGamePlayerIdMap();
+            for (int i = 1; i < gameList.size(); i++) {
+                if (gameList.get(i).getIsSlave()) {
+                    return gameList.get(i);
                 }
             }
+            return null;
+
+//            if (gameList.size() >= 2 && gameList.get(1).getIsSlave())
+//            {
+//                return gameList.get(1);
+//            } else {
+//                //retry
+//                gameList = tracker.getServerList();
+//                updateIGamePlayerIdMap();
+//                if (gameList.size() >= 2 && gameList.get(1).getIsSlave()) {
+//                    return gameList.get(1);
+//                } else {
+//                    return null;
+//                }
+//            }
         } catch (Exception e){
             Logging.printException(e);
             gameList = tracker.getServerList();
@@ -908,10 +956,11 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
     @Override
     public void quit() throws RemoteException {
         try {
+            Logging.printInfo("enter quit(): " + playerId);
             UnicastRemoteObject.unexportObject(this, true);
 
             String url = new String("//" + host + ":" + port + "/" + playerId);
-            Logging.printDebug("trying to unbind player's lookup url = " + url.toString());
+            Logging.printDebug("quit(): trying to unbind player's lookup url = " + url.toString());
 
             try {
                 Naming.unbind(url);
@@ -920,7 +969,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 Logging.printException(e);
             }
 
-            Logging.printInfo("Player QUIT, player ID: " + playerId);
+            Logging.printInfo("quit(): Player QUIT, player ID: " + playerId);
             if (this.gameInputThread != null) {
                 this.gameInputThread.interrupt();
             }
