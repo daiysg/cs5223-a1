@@ -171,7 +171,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         return;
     }
 
-    private synchronized void updateIGamePlayerIdMap(){
+    private synchronized void updateIGamePlayerIdMap() throws RemoteException {
 
         iGamePlayerIdMap.clear();
 
@@ -188,6 +188,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         gameList = new ArrayList<>(iGamePlayerIdMap.keySet());
         serverGameStatus.updatePlayerList(new ArrayList<>(iGamePlayerIdMap.values()));
         printPlayerIds();
+        tracker.setServerList(gameList);
     }
 
     private void printPlayerIds(){
@@ -251,7 +252,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 removeFailedGamer(slaveId);
                 this.gameList.remove(slave);
                 updateIGamePlayerIdMap();
-                tracker.setServerList(this.gameList);
 
                 assignNewSlave(serverGameStatus);
 
@@ -283,7 +283,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                     removeFailedGamer(gameId);
                     this.gameList.remove(iGame);
                     updateIGamePlayerIdMap();
-                    tracker.setServerList(gameList);
+
                     slave.setServerGameStatus(serverGameStatus);
                     slave.updateGameList(gameList);
 
@@ -372,7 +372,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 //                    gameStatus = reassignedGameStatusForNewSlave(i);
 //                    iGame.updateGameStatus(gameStatus);
 
-                    gameStatusUpdatePlayerList();
+                    updateIGamePlayerIdMap();
                     iGame.updateGameStatus(serverGameStatus);
                     iGame.updateGameList(gameList);
 
@@ -444,9 +444,9 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             } catch (Exception ex) {
                 Logging.printInfo("Original Master is already removed, can ignore this exception");
             }
-            gameStatusUpdatePlayerList();
-            gameList = tracker.setServerList(new ArrayList<>(gameList));
             updateIGamePlayerIdMap();
+            gameList = tracker.setServerList(new ArrayList<>(gameList));
+
 
             //start the thread used by the new Master to ping all players
             this.startMasterPingThread();
@@ -475,8 +475,14 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             Logging.printError("Call wrong master to add new Player!!! Player ID + " + playerId);
             return false;
         }
+        IGame game = null;
+        try {
+            game = Utils.connectToGame(host, port, playerId);
+        } catch (Exception ex) {
+            Logging.printException(ex);
+            return false;
+        }
 
-        IGame game = Utils.connectToGame(host, port, playerId);
         gameList.add(game);
         updateIGamePlayerIdMap();
 
@@ -491,7 +497,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             game.setSlave(true);
         }
 
-        gameStatusUpdatePlayerList();
         updateIGamePlayerIdMap();
 
         game.startGame(serverGameStatus);
@@ -792,19 +797,6 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
 
         game.quit();
     }
-
-    private void gameStatusUpdatePlayerList() {
-        serverGameStatus.updatePlayerList(gameList.stream().map(gamer -> {
-            try {
-                return gamer.getId();
-            } catch (Exception e) {
-                //e.printStackTrace();
-                Logging.printException(e);
-                return null;
-            }
-        }).filter(id -> id != null).collect(Collectors.toList()));
-    }
-
 
     private synchronized void removeFailedGamer(String playerId) throws RemoteException {
         // Master to remove Failed Player and update game status.
