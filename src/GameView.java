@@ -44,7 +44,7 @@ public class GameView {
     }
 
     static void getGraphicalMaze(GameStatus gameStatus, String masterId, String slaveId) {
-        List<String> gameView  = new ArrayList<String>();
+        List<String> gameView = new ArrayList<String>();
         List<String> playersInfo = printPlayerInformation(gameStatus, masterId, slaveId);
         Integer count = 0;
         String space_prefix = "                   ";
@@ -99,7 +99,7 @@ public class GameView {
             count++;
         }
 
-        for (String s: gameView)
+        for (String s : gameView)
             System.out.print(s + "\n");
     }
 
@@ -120,12 +120,17 @@ public class GameView {
         playersInfo.add("|  ID   | Score |");
         playersInfo.add("+-------+-------+");
 
-        // print master
-        playersInfo.add(
-                "| " + masterId + "(M) |" +
-                placeScoreInMiddle(gameStatus.getPlayerTreasureMap().get(masterId).toString(), 7) +
-                "|"
-        );
+        try {
+            // print master
+            playersInfo.add(
+                    "| " + masterId + "(M) |" +
+                            placeScoreInMiddle(gameStatus.getPlayerTreasureMap().get(masterId).toString(), 7) +
+                            "|"
+            );
+        } catch (Exception ex) {
+            Logging.printException(ex);
+        }
+
         playersInfo.add("+-------+-------+");
 
 
@@ -138,9 +143,8 @@ public class GameView {
                                 "|"
                 );
                 playersInfo.add("+-------+-------+");
-            } catch (Exception e)
-            {
-                e.printStackTrace();
+            } catch (Exception e) {
+                //e.printStackTrace();
                 Logging.printException(e);
             }
 
@@ -149,12 +153,11 @@ public class GameView {
         // print the rest players
         Map<String, Integer> playTreasureMap = gameStatus.getPlayerTreasureMap();
         for (Map.Entry<String, Integer> entry : playTreasureMap.entrySet()) {
-            if (!entry.getKey().equalsIgnoreCase(masterId) && !entry.getKey().equalsIgnoreCase(slaveId))
-            {
+            if (!entry.getKey().equalsIgnoreCase(masterId) && !entry.getKey().equalsIgnoreCase(slaveId)) {
                 playersInfo.add(
                         "|  " + entry.getKey() + "   |" +
-                        placeScoreInMiddle(entry.getValue().toString(), 7) +
-                        "|"
+                                placeScoreInMiddle(entry.getValue().toString(), 7) +
+                                "|"
                 );
                 playersInfo.add("+-------+-------+");
             }
