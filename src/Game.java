@@ -1,14 +1,14 @@
-import sun.rmi.runtime.Log;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.rmi.*;
+import java.rmi.AlreadyBoundException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class Game extends UnicastRemoteObject implements IGame, Serializable {
@@ -666,7 +666,7 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
             serverGameStatus = gameStatus;
         } catch (RemoteException e) {
             //Master Failed, Slave becomes new Master
-            e.printStackTrace();
+           // e.printStackTrace();
             Logging.printException(e);
             Logging.printInfo("movePlayerInput(): Master is down!!! gameList.size() = " + gameList.size());
 
