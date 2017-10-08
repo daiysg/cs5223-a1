@@ -918,12 +918,29 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
         if (isSlave) {
             return this;
         }
-
+/*
         try {
             for (int i = 1; i < gameList.size(); i++) {
                 if (gameList.get(i).getIsSlave())
                     return gameList.get(i);
             }
+
+            for (int j =0; j < 3; j++) {
+                gameList = tracker.getServerList();
+                updateIGamePlayerIdMap();
+                for (int i = 1; i < gameList.size(); i++) {
+                    if (gameList.get(i).getIsSlave()) {
+                        return gameList.get(i);
+                    }
+                }
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e3) {
+                    Logging.printDebug("getSlave(): Thread.sleep Exception. Can be ignored.");
+                }
+
+            }
+
         } catch (Exception e) {
             Logging.printDebug("getSlave(): can't find Slave from own gameList. Get the list from tracker and retry.");
             try {
@@ -951,23 +968,48 @@ public class Game extends UnicastRemoteObject implements IGame, Serializable {
                 return null;
             }
 
+        }*/
 
+//        return null;
+
+        try {
+            if (gameList.size() >= 2 && gameList.get(1).getIsSlave())
+            {
+                return gameList.get(1);
+            } else {
+                // try to retrieve the list from Tracker and retry
+                Logging.printDebug("getSlave(): can't find Slave from own gameList. Get the list from tracker and retry.");
+                gameList = tracker.getServerList();
+                updateIGamePlayerIdMap();
+                if (gameList.size() >= 2 && gameList.get(1).getIsSlave()) {
+                    return gameList.get(1);
+                } else {
+                    throw new WrongGameException("can't find Slave");
+                }
+            }
+        } catch (Exception e) {
+            //wait and then retry one more time
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e1) {
+                Logging.printDebug("getSlave(): Thread.sleep Exception. Can be ignored.");
+            }
+            Logging.printDebug("getSlave(): Get the list from tracker and retry one more time.");
+
+            try {
+                gameList = tracker.getServerList();
+                updateIGamePlayerIdMap();
+                if (gameList.size() >= 2 && gameList.get(1).getIsSlave()) {
+                    return gameList.get(1);
+                } else {
+                    return null;
+                }
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                Logging.printException(e2);
+            }
         }
-            return null;
-
-//            if (gameList.size() >= 2 && gameList.get(1).getIsSlave())
-//            {
-//                return gameList.get(1);
-//            } else {
-//                //retry
-//                gameList = tracker.getServerList();
-//                updateIGamePlayerIdMap();
-//                if (gameList.size() >= 2 && gameList.get(1).getIsSlave()) {
-//                    return gameList.get(1);
-//                } else {
-//                    return null;
-//                }
-//            }
+        return null;
     }
 
     @Override
